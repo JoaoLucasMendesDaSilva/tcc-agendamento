@@ -1,18 +1,52 @@
 import './styles.css';
+import { useEffect, useState } from 'react';
+import ProtectedRoute from './components/ProtectedRoute';
+import Cadastro from './pages/Cadastro';
+import Dashboard from './pages/Dashboard';
+import Login from './pages/Login';
 
 function App() {
-  return (
-    <main className="page">
-      <section className="status-panel" aria-labelledby="page-title">
-        <p className="eyebrow">TCC - Sistema de Agendamento Online</p>
-        <h1 id="page-title">Sistema em desenvolvimento</h1>
-        <p>
-          Esta e a base inicial do MVP. As proximas etapas vao adicionar login,
-          cadastro do negocio, servicos, profissionais e agendamento publico.
-        </p>
-      </section>
-    </main>
-  );
+  const [path, setPath] = useState(window.location.pathname);
+
+  useEffect(() => {
+    function handlePopState() {
+      setPath(window.location.pathname);
+    }
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  function navigate(nextPath, options = {}) {
+    if (nextPath === window.location.pathname) {
+      return;
+    }
+
+    if (options.replace) {
+      window.history.replaceState({}, '', nextPath);
+    } else {
+      window.history.pushState({}, '', nextPath);
+    }
+
+    setPath(nextPath);
+  }
+
+  if (path === '/cadastro') {
+    return <Cadastro navigate={navigate} />;
+  }
+
+  if (path === '/dashboard') {
+    return (
+      <ProtectedRoute navigate={navigate}>
+        <Dashboard navigate={navigate} />
+      </ProtectedRoute>
+    );
+  }
+
+  return <Login navigate={navigate} />;
 }
 
 export default App;

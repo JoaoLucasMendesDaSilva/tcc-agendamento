@@ -15,18 +15,22 @@ body {
 }
 
 .page {
-  display: grid;
   min-height: 100vh;
-  place-items: center;
   padding: 24px;
 }
 
-.status-panel {
+.page-center {
+  display: grid;
+  place-items: center;
+}
+
+.auth-panel,
+.dashboard-panel {
   width: min(100%, 640px);
   border: 1px solid #d8dee9;
   border-radius: 8px;
   background: #ffffff;
-  padding: 28px;
+  padding: 24px;
   box-shadow: 0 10px 30px rgba(23, 32, 42, 0.08);
 }
 
@@ -40,17 +44,136 @@ body {
 
 h1 {
   margin: 0 0 12px;
-  font-size: clamp(2rem, 8vw, 3rem);
+  font-size: 2rem;
   line-height: 1.1;
 }
 
-p {
+h2 {
+  margin: 0 0 10px;
+  font-size: 1.25rem;
+}
+
+p,
+label,
+input,
+button {
   margin: 0;
   font-size: 1rem;
 }
 
+.panel-text {
+  color: #526070;
+}
+
+.form {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+label {
+  display: grid;
+  gap: 8px;
+  color: #344054;
+  font-weight: 700;
+}
+
+input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #b9c2cf;
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: #17202a;
+  background: #ffffff;
+}
+
+input:focus {
+  border-color: #246b61;
+  outline: 3px solid rgba(36, 107, 97, 0.18);
+}
+
+.button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.button-primary {
+  color: #ffffff;
+  background: #246b61;
+}
+
+.button-secondary {
+  color: #246b61;
+  background: #e4f1ee;
+}
+
+.button-link {
+  width: 100%;
+  margin-top: 16px;
+  color: #246b61;
+  background: transparent;
+}
+
+.message {
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.message-error {
+  color: #8a1f11;
+  background: #fdecea;
+}
+
+.message-success {
+  color: #14532d;
+  background: #dcfce7;
+}
+
+.dashboard-page {
+  display: grid;
+  align-content: start;
+  gap: 20px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+  padding-top: 12px;
+}
+
+.dashboard-header .button {
+  width: 100%;
+}
+
+.dashboard-panel {
+  box-shadow: none;
+}
+
 @media (min-width: 720px) {
-  .status-panel {
+  .auth-panel,
+  .dashboard-panel {
     padding: 40px;
+  }
+
+  .dashboard-header {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+
+  .dashboard-header .button {
+    width: auto;
   }
 }
