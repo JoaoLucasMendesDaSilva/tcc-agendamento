@@ -36,6 +36,14 @@ function Dashboard({ navigate }) {
           >
             Meu negocio
           </button>
+
+          <button
+            className="button button-secondary"
+            onClick={() => navigate('/servicos')}
+            type="button"
+          >
+            Servicos
+          </button>
         </div>
       </section>
     </main>

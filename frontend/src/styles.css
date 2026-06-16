@@ -128,6 +128,11 @@ textarea:focus {
   background: #e4f1ee;
 }
 
+.button-danger {
+  color: #8a1f11;
+  background: #fdecea;
+}
+
 .button-link {
   width: 100%;
   margin-top: 16px;
@@ -199,6 +204,11 @@ textarea:focus {
   gap: 16px;
 }
 
+.button-row {
+  display: grid;
+  gap: 12px;
+}
+
 .checkbox-group {
   display: grid;
   gap: 12px;
@@ -226,6 +236,55 @@ textarea:focus {
   min-height: 20px;
 }
 
+.empty-state {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.card-list {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.item-card {
+  display: grid;
+  gap: 16px;
+  border: 1px solid #d8dee9;
+  border-radius: 8px;
+  padding: 16px;
+  background: #ffffff;
+}
+
+.item-card h3 {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+}
+
+.meta-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 0;
+}
+
+.meta-list div {
+  border-radius: 8px;
+  padding: 12px;
+  background: #f8fafc;
+}
+
+.meta-list dt {
+  color: #526070;
+  font-size: 0.85rem;
+}
+
+.meta-list dd {
+  margin: 0;
+  font-weight: 700;
+}
+
 @media (min-width: 720px) {
   .auth-panel,
   .dashboard-panel {
@@ -243,5 +302,9 @@ textarea:focus {
 
   .form-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .button-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
