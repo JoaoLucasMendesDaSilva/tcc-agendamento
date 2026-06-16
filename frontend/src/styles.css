@@ -56,6 +56,7 @@ h2 {
 p,
 label,
 input,
+select,
 textarea,
 button {
   margin: 0;
@@ -80,6 +81,7 @@ label {
 }
 
 input,
+select,
 textarea {
   width: 100%;
   border: 1px solid #b9c2cf;
@@ -94,11 +96,16 @@ input {
   min-height: 48px;
 }
 
+select {
+  min-height: 48px;
+}
+
 textarea {
   resize: vertical;
 }
 
 input:focus,
+select:focus,
 textarea:focus {
   border-color: #246b61;
   outline: 3px solid rgba(36, 107, 97, 0.18);
@@ -219,6 +226,13 @@ textarea:focus {
 .button-row {
   display: grid;
   gap: 12px;
+}
+
+.filter-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 20px 0;
 }
 
 .checkbox-group {
@@ -348,6 +362,52 @@ textarea:focus {
   font-weight: 700;
 }
 
+.appointment-heading {
+  display: grid;
+  gap: 12px;
+}
+
+.status-badge {
+  justify-self: start;
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: #17202a;
+  background: #e7f1fb;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.status-confirmado {
+  color: #14532d;
+  background: #dcfce7;
+}
+
+.status-cancelado {
+  color: #8a1f11;
+  background: #fdecea;
+}
+
+.status-concluido {
+  color: #17446b;
+  background: #e7f1fb;
+}
+
+.details-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+.details-list dt {
+  color: #526070;
+  font-size: 0.85rem;
+}
+
+.details-list dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 @media (min-width: 720px) {
   .auth-panel,
   .dashboard-panel {
@@ -377,5 +437,10 @@ textarea:focus {
 
   .time-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .appointment-heading {
+    grid-template-columns: 1fr auto;
+    align-items: start;
   }
 }

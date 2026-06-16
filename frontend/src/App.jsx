@@ -1,6 +1,7 @@
 import './styles.css';
 import { useEffect, useState } from 'react';
 import ProtectedRoute from './components/ProtectedRoute';
+import Agenda from './pages/Agenda';
 import Cadastro from './pages/Cadastro';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
@@ -76,6 +77,14 @@ function App() {
     return (
       <ProtectedRoute navigate={navigate}>
         <Profissionais navigate={navigate} />
+      </ProtectedRoute>
+    );
+  }
+
+  if (path === '/agenda') {
+    return (
+      <ProtectedRoute navigate={navigate}>
+        <Agenda navigate={navigate} />
       </ProtectedRoute>
     );
   }

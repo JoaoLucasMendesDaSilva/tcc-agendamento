@@ -52,6 +52,14 @@ function Dashboard({ navigate }) {
           >
             Profissionais
           </button>
+
+          <button
+            className="button button-secondary"
+            onClick={() => navigate('/agenda')}
+            type="button"
+          >
+            Agenda
+          </button>
         </div>
       </section>
     </main>
