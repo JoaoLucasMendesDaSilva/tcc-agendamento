@@ -383,6 +383,32 @@ Authorization: Bearer <token>
 - Proteger ou remover `/api/db-health` em producao.
 - Revisar estrategia de armazenamento do token no frontend.
 
+## Checklist breve de deploy
+
+Antes de publicar:
+
+- Definir `NODE_ENV=production` no backend.
+- Configurar `JWT_SECRET` forte e privado.
+- Configurar `CORS_ORIGIN` com a URL real do frontend, sem wildcard.
+- Configurar `VITE_API_URL` no frontend com a URL real da API.
+- Configurar variaveis `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD` e `DB_NAME` com dados do MySQL de producao.
+- Executar `backend/database/migrations/001_create_schema.sql` no MySQL de producao.
+- Rodar `npm audit --audit-level=high` no backend e no frontend.
+- Rodar `npm run build` no frontend.
+- Confirmar que `/api/db-health` nao testa o banco quando `NODE_ENV=production`.
+- Confirmar que rotas do frontend recarregam corretamente na Vercel; o arquivo `frontend/vercel.json` faz rewrite para `index.html`.
+
+Sugestao simples:
+
+- Frontend: Vercel.
+- Backend e MySQL: Railway.
+
+Alternativa:
+
+- Frontend: Vercel.
+- Backend: Render.
+- MySQL: Railway ou outro provedor MySQL gerenciado.
+
 ## Status atual do projeto
 
 O MVP esta implementado localmente com backend, banco de dados e frontend funcional.

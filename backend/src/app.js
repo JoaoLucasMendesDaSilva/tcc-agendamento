@@ -66,6 +66,13 @@ app.get('/api/health', (req, res) => {
 });
 
 app.get('/api/db-health', async (req, res, next) => {
+  if (process.env.NODE_ENV === 'production') {
+    res.status(404).json({
+      erro: 'Rota nao encontrada.',
+    });
+    return;
+  }
+
   try {
     await testDatabaseConnection();
 
