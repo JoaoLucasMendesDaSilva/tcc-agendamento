@@ -5,6 +5,7 @@ import Cadastro from './pages/Cadastro';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Negocio from './pages/Negocio';
+import Profissionais from './pages/Profissionais';
 import Servicos from './pages/Servicos';
 
 function App() {
@@ -60,6 +61,14 @@ function App() {
     return (
       <ProtectedRoute navigate={navigate}>
         <Servicos navigate={navigate} />
+      </ProtectedRoute>
+    );
+  }
+
+  if (path === '/profissionais') {
+    return (
+      <ProtectedRoute navigate={navigate}>
+        <Profissionais navigate={navigate} />
       </ProtectedRoute>
     );
   }

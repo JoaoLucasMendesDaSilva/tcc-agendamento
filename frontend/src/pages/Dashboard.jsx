@@ -44,6 +44,14 @@ function Dashboard({ navigate }) {
           >
             Servicos
           </button>
+
+          <button
+            className="button button-secondary"
+            onClick={() => navigate('/profissionais')}
+            type="button"
+          >
+            Profissionais
+          </button>
         </div>
       </section>
     </main>
