@@ -194,117 +194,22 @@ textarea {
   color: var(--white);
 }
 
-.calendar-visual {
-  position: relative;
-  width: min(100%, 300px);
-  height: 270px;
+.auth-illustration-wrap {
+  display: grid;
+  width: 100%;
+  min-height: 270px;
+  place-items: center;
   margin: 20px auto;
   animation: softFloat 6s ease-in-out infinite;
 }
 
-.calendar-board {
-  position: absolute;
-  right: 22px;
-  bottom: 42px;
-  display: grid;
-  grid-template-columns: repeat(3, 34px);
-  gap: 14px;
-  width: 170px;
-  padding: 42px 24px 28px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 24px 45px rgba(0, 0, 0, 0.18);
-}
-
-.calendar-board::before {
-  position: absolute;
-  top: 18px;
-  left: 22px;
-  right: 22px;
-  height: 5px;
-  border-radius: 99px;
-  background: linear-gradient(90deg, #f0b333 0 20%, #ffffff 20% 30%, #0b8d7e 30% 52%, #ffffff 52% 62%, #0b8d7e 62%);
-  content: "";
-}
-
-.calendar-board span {
-  width: 34px;
-  height: 34px;
-  border-radius: 6px;
-  background: #e8ede9;
-}
-
-.calendar-board span:first-child,
-.calendar-board span:nth-child(5) {
-  background: #37c878;
-}
-
-.clock-face {
-  position: absolute;
-  right: 0;
-  bottom: 18px;
-  width: 82px;
-  height: 82px;
-  border: 8px solid #174a55;
-  border-radius: 50%;
-  background: #f5fbfa;
-  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.18);
-}
-
-.clock-face::before,
-.clock-face::after {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 4px;
-  border-radius: 99px;
-  background: #174a55;
-  content: "";
-  transform-origin: top;
-}
-
-.clock-face::before {
-  height: 24px;
-  transform: rotate(0deg);
-}
-
-.clock-face::after {
-  height: 19px;
-  transform: rotate(48deg);
-}
-
-.plant-shape {
-  position: absolute;
-  left: 18px;
-  bottom: 26px;
-  width: 56px;
-  height: 92px;
-  border-radius: 80% 0 80% 0;
-  background: #2bb66f;
-  transform: rotate(-22deg);
-  opacity: 0.9;
-}
-
-.plant-shape::before,
-.plant-shape::after {
-  position: absolute;
-  width: 48px;
-  height: 72px;
-  border-radius: 80% 0 80% 0;
-  background: #6fd17b;
-  content: "";
-}
-
-.plant-shape::before {
-  left: -22px;
-  bottom: -12px;
-  transform: rotate(-24deg);
-}
-
-.plant-shape::after {
-  right: -22px;
-  bottom: -20px;
-  transform: rotate(38deg);
+.auth-illustration {
+  display: block;
+  width: clamp(240px, 82%, 310px);
+  max-width: 82%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.18));
 }
 
 .auth-visual-copy h2 {
@@ -575,6 +480,13 @@ textarea:focus {
   font-size: 0.78rem;
 }
 
+.sidebar-icon svg,
+.metric-icon svg,
+.quick-icon svg,
+.status-action-icon svg {
+  display: block;
+}
+
 .sidebar-link.is-active .sidebar-icon {
   background: rgba(255, 255, 255, 0.18);
 }
@@ -720,10 +632,11 @@ textarea:focus {
   flex: 0 0 auto;
   place-items: center;
   border-radius: 16px;
+  color: var(--green-800);
   background: var(--green-100);
 }
 
-.metric-icon::before {
+.metric-icon:empty::before {
   width: 22px;
   height: 22px;
   border: 3px solid var(--green-800);
@@ -732,18 +645,20 @@ textarea:focus {
 }
 
 .metric-yellow {
+  color: var(--yellow-600);
   background: var(--yellow-100);
 }
 
-.metric-yellow::before {
+.metric-yellow:empty::before {
   border-color: var(--yellow-600);
 }
 
 .metric-blue {
+  color: var(--blue-600);
   background: var(--blue-100);
 }
 
-.metric-blue::before {
+.metric-blue:empty::before {
   border-color: var(--blue-600);
 }
 
@@ -1139,6 +1054,7 @@ textarea:focus {
 .status-action {
   display: flex;
   align-items: center;
+  gap: 10px;
   min-height: 48px;
   border: 1px solid var(--gray-300);
   border-radius: 12px;
@@ -1152,6 +1068,27 @@ textarea:focus {
     border-color 180ms ease,
     box-shadow 180ms ease,
     transform 180ms ease;
+}
+
+.status-action-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 9px;
+  color: var(--green-800);
+  background: var(--green-100);
+}
+
+.status-action-blue {
+  color: var(--blue-600);
+  background: var(--blue-100);
+}
+
+.status-action-yellow {
+  color: var(--yellow-600);
+  background: var(--yellow-100);
 }
 
 .status-action:hover {
@@ -1839,7 +1776,7 @@ textarea:focus {
     transition-duration: 1ms !important;
   }
 
-  .calendar-visual,
+  .auth-illustration-wrap,
   .auth-card,
   .auth-visual-panel,
   .booking-section,

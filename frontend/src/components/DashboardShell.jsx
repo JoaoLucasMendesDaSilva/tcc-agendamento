@@ -1,14 +1,28 @@
+import {
+  CalendarDays,
+  LayoutDashboard,
+  LogOut,
+  Scissors,
+  Store,
+  Users,
+} from 'lucide-react';
 import BrandLogo from './BrandLogo';
 
 const NAV_ITEMS = [
-  { label: 'Dashboard', path: '/dashboard', icon: 'D' },
-  { label: 'Meu Negócio', path: '/negocio', icon: 'N' },
-  { label: 'Serviços', path: '/servicos', icon: 'S' },
-  { label: 'Profissionais', path: '/profissionais', icon: 'P' },
-  { label: 'Agenda', path: '/agenda', icon: 'A' },
+  { label: 'Dashboard', path: '/dashboard', Icon: LayoutDashboard },
+  { label: 'Meu Negócio', path: '/negocio', Icon: Store },
+  { label: 'Serviços', path: '/servicos', Icon: Scissors },
+  { label: 'Profissionais', path: '/profissionais', Icon: Users },
+  { label: 'Agenda', path: '/agenda', Icon: CalendarDays },
 ];
 
-function DashboardShell({ children, currentPath = '/dashboard', navigate, onLogout, usuario }) {
+function DashboardShell({
+  children,
+  currentPath = '/dashboard',
+  navigate,
+  onLogout,
+  usuario,
+}) {
   return (
     <main className="app-shell">
       <aside className="sidebar">
@@ -17,26 +31,34 @@ function DashboardShell({ children, currentPath = '/dashboard', navigate, onLogo
         </div>
 
         <nav className="sidebar-nav" aria-label="Navegação principal">
-          {NAV_ITEMS.map((item) => (
-            <button
-              className={`sidebar-link ${
-                currentPath === item.path ? 'is-active' : ''
-              }`}
-              key={item.path}
-              onClick={() => navigate(item.path)}
-              type="button"
-            >
-              <span className="sidebar-icon" aria-hidden="true">
-                {item.icon}
-              </span>
-              {item.label}
-            </button>
-          ))}
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.Icon;
+
+            return (
+              <button
+                className={`sidebar-link ${
+                  currentPath === item.path ? 'is-active' : ''
+                }`}
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                type="button"
+              >
+                <span className="sidebar-icon" aria-hidden="true">
+                  <Icon size={19} strokeWidth={2} />
+                </span>
+                {item.label}
+              </button>
+            );
+          })}
         </nav>
 
-        <button className="sidebar-link sidebar-logout" onClick={onLogout} type="button">
+        <button
+          className="sidebar-link sidebar-logout"
+          onClick={onLogout}
+          type="button"
+        >
           <span className="sidebar-icon" aria-hidden="true">
-            X
+            <LogOut size={19} strokeWidth={2} />
           </span>
           Sair
         </button>

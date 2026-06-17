@@ -1,3 +1,4 @@
+import authIllustration from '../assets/auth-illustration.png';
 import BrandLogo from './BrandLogo';
 
 function AuthLayout({ children, mode = 'login' }) {
@@ -6,19 +7,14 @@ function AuthLayout({ children, mode = 'login' }) {
       <section className="auth-card" aria-label="Acesso do empreendedor">
         <div className="auth-form-panel">{children}</div>
 
-        <aside className="auth-visual-panel" aria-hidden="true">
+        <aside className="auth-visual-panel">
           <BrandLogo />
-          <div className="calendar-visual">
-            <div className="calendar-board">
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-            </div>
-            <div className="clock-face" />
-            <div className="plant-shape" />
+          <div className="auth-illustration-wrap">
+            <img
+              alt="Ilustração de calendário com planta e relógio"
+              className="auth-illustration"
+              src={authIllustration}
+            />
           </div>
           <div className="auth-visual-copy">
             <h2>

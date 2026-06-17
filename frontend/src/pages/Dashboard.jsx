@@ -1,3 +1,10 @@
+import {
+  CalendarCheck,
+  CalendarDays,
+  Scissors,
+  Store,
+  Users,
+} from 'lucide-react';
 import DashboardShell from '../components/DashboardShell';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -24,32 +31,56 @@ function Dashboard({ navigate }) {
       </header>
 
       <section className="metrics-grid" aria-label="Atalhos principais">
-        <button className="metric-card metric-action" onClick={() => navigate('/negocio')} type="button">
-          <span className="metric-icon" aria-hidden="true" />
+        <button
+          className="metric-card metric-action"
+          onClick={() => navigate('/negocio')}
+          type="button"
+        >
+          <span className="metric-icon" aria-hidden="true">
+            <Store size={22} strokeWidth={2} />
+          </span>
           <div>
             <p>Meu negócio</p>
             <strong>Dados do negócio</strong>
             <small>Horários, cidade e link público</small>
           </div>
         </button>
-        <button className="metric-card metric-action" onClick={() => navigate('/servicos')} type="button">
-          <span className="metric-icon metric-yellow" aria-hidden="true" />
+        <button
+          className="metric-card metric-action"
+          onClick={() => navigate('/servicos')}
+          type="button"
+        >
+          <span className="metric-icon metric-yellow" aria-hidden="true">
+            <Scissors size={22} strokeWidth={2} />
+          </span>
           <div>
             <p>Serviços</p>
             <strong>Catálogo</strong>
             <small>Preços e duração dos atendimentos</small>
           </div>
         </button>
-        <button className="metric-card metric-action" onClick={() => navigate('/profissionais')} type="button">
-          <span className="metric-icon metric-blue" aria-hidden="true" />
+        <button
+          className="metric-card metric-action"
+          onClick={() => navigate('/profissionais')}
+          type="button"
+        >
+          <span className="metric-icon metric-blue" aria-hidden="true">
+            <Users size={22} strokeWidth={2} />
+          </span>
           <div>
             <p>Profissionais</p>
             <strong>Equipe</strong>
             <small>Pessoas disponíveis para atender</small>
           </div>
         </button>
-        <button className="metric-card metric-action" onClick={() => navigate('/agenda')} type="button">
-          <span className="metric-icon" aria-hidden="true" />
+        <button
+          className="metric-card metric-action"
+          onClick={() => navigate('/agenda')}
+          type="button"
+        >
+          <span className="metric-icon" aria-hidden="true">
+            <CalendarCheck size={22} strokeWidth={2} />
+          </span>
           <div>
             <p>Agenda</p>
             <strong>Agendamentos</strong>
@@ -63,7 +94,9 @@ function Dashboard({ navigate }) {
           <div className="panel-heading">
             <div>
               <h2 id="next-title">Resumo da agenda</h2>
-              <p className="panel-text">Acompanhe os horários reais pela tela de agenda.</p>
+              <p className="panel-text">
+                Acompanhe os horários reais pela tela de agenda.
+              </p>
             </div>
             <button
               className="button button-secondary button-small"
@@ -78,41 +111,85 @@ function Dashboard({ navigate }) {
             <span className="empty-icon" aria-hidden="true" />
             <div>
               <strong>Agenda pronta para uso</strong>
-              <p>Use a área de agenda para visualizar clientes, serviços, profissionais, horários e status dos agendamentos cadastrados.</p>
+              <p>
+                Use a área de agenda para visualizar clientes, serviços,
+                profissionais, horários e status dos agendamentos cadastrados.
+              </p>
             </div>
           </div>
         </article>
 
         <article className="dashboard-panel" aria-labelledby="status-title">
           <h2 id="status-title">Atalhos rápidos</h2>
-          <p className="panel-text">Continue a configuração do sistema sem perder tempo.</p>
+          <p className="panel-text">
+            Continue a configuração do sistema sem perder tempo.
+          </p>
           <div className="status-summary status-actions">
-            <button className="status-action" onClick={() => navigate('/servicos')} type="button">
-              <span className="dot dot-green" /> Cadastrar serviços
+            <button
+              className="status-action"
+              onClick={() => navigate('/servicos')}
+              type="button"
+            >
+              <span className="status-action-icon" aria-hidden="true">
+                <Scissors size={18} strokeWidth={2} />
+              </span>
+              Cadastrar serviços
             </button>
-            <button className="status-action" onClick={() => navigate('/profissionais')} type="button">
-              <span className="dot dot-blue" /> Cadastrar profissionais
+            <button
+              className="status-action"
+              onClick={() => navigate('/profissionais')}
+              type="button"
+            >
+              <span className="status-action-icon status-action-blue" aria-hidden="true">
+                <Users size={18} strokeWidth={2} />
+              </span>
+              Cadastrar profissionais
             </button>
-            <button className="status-action" onClick={() => navigate('/agenda')} type="button">
-              <span className="dot dot-yellow" /> Ver agenda
+            <button
+              className="status-action"
+              onClick={() => navigate('/agenda')}
+              type="button"
+            >
+              <span className="status-action-icon status-action-yellow" aria-hidden="true">
+                <CalendarDays size={18} strokeWidth={2} />
+              </span>
+              Ver agenda
             </button>
           </div>
         </article>
       </section>
 
       <section className="shortcut-strip" aria-label="Atalhos do sistema">
-        <button className="quick-action" onClick={() => navigate('/negocio')} type="button">
-          <span className="quick-icon">N</span>
+        <button
+          className="quick-action"
+          onClick={() => navigate('/negocio')}
+          type="button"
+        >
+          <span className="quick-icon" aria-hidden="true">
+            <Store size={20} strokeWidth={2} />
+          </span>
           <strong>Meu negócio</strong>
           <small>Dados e link público</small>
         </button>
-        <button className="quick-action" onClick={() => navigate('/servicos')} type="button">
-          <span className="quick-icon">S</span>
+        <button
+          className="quick-action"
+          onClick={() => navigate('/servicos')}
+          type="button"
+        >
+          <span className="quick-icon" aria-hidden="true">
+            <Scissors size={20} strokeWidth={2} />
+          </span>
           <strong>Serviços</strong>
           <small>Preços e duração</small>
         </button>
-        <button className="quick-action" onClick={() => navigate('/profissionais')} type="button">
-          <span className="quick-icon">P</span>
+        <button
+          className="quick-action"
+          onClick={() => navigate('/profissionais')}
+          type="button"
+        >
+          <span className="quick-icon" aria-hidden="true">
+            <Users size={20} strokeWidth={2} />
+          </span>
           <strong>Profissionais</strong>
           <small>Equipe de atendimento</small>
         </button>
