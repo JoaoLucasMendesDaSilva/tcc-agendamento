@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import DashboardShell from '../components/DashboardShell';
+import { useAuth } from '../contexts/AuthContext';
 import {
   atualizarStatusAgendamento,
   cancelarAgendamento,
@@ -7,12 +9,18 @@ import {
 } from '../services/agendamentosService';
 
 const STATUS = ['pendente', 'confirmado', 'cancelado', 'concluido'];
+const STATUS_LABELS = {
+  pendente: 'Pendente',
+  confirmado: 'Confirmado',
+  cancelado: 'Cancelado',
+  concluido: 'Concluído',
+};
 
 function formatarDataHora(valor) {
   const data = new Date(String(valor || '').replace(' ', 'T'));
 
   if (Number.isNaN(data.getTime())) {
-    return valor || 'Data nao informada';
+    return valor || 'Data não informada';
   }
 
   return data.toLocaleString('pt-BR', {
@@ -29,6 +37,7 @@ function normalizarMensagem(texto) {
 }
 
 function Agenda({ navigate }) {
+  const { logout, usuario } = useAuth();
   const [agendamentos, setAgendamentos] = useState([]);
   const [filtro, setFiltro] = useState('todos');
   const [carregando, setCarregando] = useState(true);
@@ -104,28 +113,40 @@ function Agenda({ navigate }) {
     }
   }
 
+  function handleLogout() {
+    logout();
+    navigate('/login', { replace: true });
+  }
+
   return (
-    <main className="page dashboard-page">
-      <header className="dashboard-header">
+    <DashboardShell
+      currentPath="/agenda"
+      navigate={navigate}
+      onLogout={handleLogout}
+      usuario={usuario}
+    >
+      <header className="page-title">
         <div>
           <p className="eyebrow">Painel do empreendedor</p>
           <h1>Agenda</h1>
+          <p className="panel-text">
+            Acompanhe os horários do seu negócio em uma lista simples.
+          </p>
         </div>
-
-        <button
-          className="button button-secondary"
-          onClick={() => navigate('/dashboard')}
-          type="button"
-        >
-          Voltar
-        </button>
       </header>
 
-      <section className="dashboard-panel" aria-labelledby="agenda-title">
-        <h2 id="agenda-title">Agendamentos</h2>
-        <p className="panel-text">
-          Acompanhe os horarios do negocio em uma lista simples.
-        </p>
+      <section
+        className="dashboard-panel agenda-panel"
+        aria-labelledby="agenda-title"
+      >
+        <div className="panel-heading">
+          <div>
+            <h2 id="agenda-title">Agendamentos</h2>
+            <p className="panel-text">
+              Use os filtros para acompanhar tudo ou focar no dia de hoje.
+            </p>
+          </div>
+        </div>
 
         <div className="filter-row" aria-label="Filtro de agendamentos">
           <button
@@ -160,36 +181,44 @@ function Agenda({ navigate }) {
         )}
 
         {!carregando && precisaCadastrarNegocio && (
-          <div className="empty-state">
-            <p>Cadastre o negocio antes de consultar a agenda.</p>
-            <button
-              className="button button-primary"
-              onClick={() => navigate('/negocio')}
-              type="button"
-            >
-              Cadastrar negocio
-            </button>
+          <div className="dashboard-empty">
+            <span className="empty-icon" aria-hidden="true" />
+            <div>
+              <strong>Cadastre o negócio primeiro</strong>
+              <p>Depois disso, você poderá consultar os agendamentos.</p>
+              <button
+                className="button button-primary button-small"
+                onClick={() => navigate('/negocio')}
+                type="button"
+              >
+                Cadastrar negócio
+              </button>
+            </div>
           </div>
         )}
 
         {!carregando &&
           !precisaCadastrarNegocio &&
           agendamentos.length === 0 && (
-            <p className="panel-text">
-              Nenhum agendamento encontrado para este filtro.
-            </p>
+            <div className="dashboard-empty">
+              <span className="empty-icon" aria-hidden="true" />
+              <div>
+                <strong>Nenhum agendamento encontrado</strong>
+                <p>Não há horários para o filtro selecionado.</p>
+              </div>
+            </div>
           )}
 
-        <div className="card-list">
+        <div className="entity-list">
           {agendamentos.map((agendamento) => (
-            <article className="item-card" key={agendamento.id}>
-              <div className="appointment-heading">
+            <article className="entity-card agenda-card" key={agendamento.id}>
+              <div className="entity-card-header">
                 <div>
                   <h3>{agendamento.cliente_nome}</h3>
                   <p>{formatarDataHora(agendamento.data_hora_inicio)}</p>
                 </div>
                 <span className={`status-badge status-${agendamento.status}`}>
-                  {agendamento.status}
+                  {STATUS_LABELS[agendamento.status] || agendamento.status}
                 </span>
               </div>
 
@@ -205,7 +234,7 @@ function Agenda({ navigate }) {
                   </div>
                 )}
                 <div>
-                  <dt>Servico</dt>
+                  <dt>Serviço</dt>
                   <dd>{agendamento.servico_nome}</dd>
                 </div>
                 <div>
@@ -214,42 +243,44 @@ function Agenda({ navigate }) {
                 </div>
                 {agendamento.observacoes && (
                   <div>
-                    <dt>Observacoes</dt>
+                    <dt>Observações</dt>
                     <dd>{agendamento.observacoes}</dd>
                   </div>
                 )}
               </dl>
 
-              <label>
-                Status
-                <select
-                  disabled={salvandoId === agendamento.id}
-                  onChange={(event) =>
-                    alterarStatus(agendamento, event.target.value)
-                  }
-                  value={agendamento.status}
-                >
-                  {STATUS.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <div className="agenda-actions">
+                <label>
+                  Status
+                  <select
+                    disabled={salvandoId === agendamento.id}
+                    onChange={(event) =>
+                      alterarStatus(agendamento, event.target.value)
+                    }
+                    value={agendamento.status}
+                  >
+                    {STATUS.map((status) => (
+                      <option key={status} value={status}>
+                        {STATUS_LABELS[status]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
-              <button
-                className="button button-danger"
-                disabled={salvandoId === agendamento.id}
-                onClick={() => cancelar(agendamento)}
-                type="button"
-              >
-                {salvandoId === agendamento.id ? 'Salvando...' : 'Cancelar'}
-              </button>
+                <button
+                  className="button button-danger"
+                  disabled={salvandoId === agendamento.id}
+                  onClick={() => cancelar(agendamento)}
+                  type="button"
+                >
+                  {salvandoId === agendamento.id ? 'Salvando...' : 'Cancelar'}
+                </button>
+              </div>
             </article>
           ))}
         </div>
       </section>
-    </main>
+    </DashboardShell>
   );
 }
 

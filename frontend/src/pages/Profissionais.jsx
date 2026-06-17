@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import DashboardShell from '../components/DashboardShell';
+import { useAuth } from '../contexts/AuthContext';
 import {
   atualizarProfissional,
   criarProfissional,
@@ -43,6 +45,7 @@ function normalizarMensagem(texto) {
 }
 
 function Profissionais({ navigate }) {
+  const { logout, usuario } = useAuth();
   const [profissionais, setProfissionais] = useState([]);
   const [profissionalEditando, setProfissionalEditando] = useState(null);
   const [form, setForm] = useState(FORM_INICIAL);
@@ -145,181 +148,214 @@ function Profissionais({ navigate }) {
     }
   }
 
+  function handleLogout() {
+    logout();
+    navigate('/login', { replace: true });
+  }
+
   return (
-    <main className="page dashboard-page">
-      <header className="dashboard-header">
+    <DashboardShell
+      currentPath="/profissionais"
+      navigate={navigate}
+      onLogout={handleLogout}
+      usuario={usuario}
+    >
+      <header className="page-title">
         <div>
           <p className="eyebrow">Painel do empreendedor</p>
           <h1>Profissionais</h1>
+          <p className="panel-text">
+            Gerencie quem atende os agendamentos do seu negócio.
+          </p>
         </div>
-
-        <button
-          className="button button-secondary"
-          onClick={() => navigate('/dashboard')}
-          type="button"
-        >
-          Voltar
-        </button>
       </header>
 
-      <section className="dashboard-panel" aria-labelledby="profissionais-form-title">
-        <h2 id="profissionais-form-title">
-          {profissionalEditando ? 'Editar profissional' : 'Novo profissional'}
-        </h2>
-        <p className="panel-text">
-          Cadastre quem podera atender os agendamentos do negocio.
-        </p>
-
-        {carregando && (
-          <p className="message message-info" aria-live="polite">
-            Carregando profissionais...
-          </p>
-        )}
-
-        {!carregando && erro && <p className="message message-error">{erro}</p>}
-        {!carregando && sucesso && (
-          <p className="message message-success">{sucesso}</p>
-        )}
-
-        {!carregando && precisaCadastrarNegocio && (
-          <div className="empty-state">
-            <p>Cadastre o negocio antes de adicionar profissionais.</p>
-            <button
-              className="button button-primary"
-              onClick={() => navigate('/negocio')}
-              type="button"
-            >
-              Cadastrar negocio
-            </button>
+      <section className="management-grid">
+        <div className="dashboard-panel management-form-card">
+          <div className="panel-heading">
+            <div>
+              <h2 id="profissionais-form-title">
+                {profissionalEditando ? 'Editar profissional' : 'Novo profissional'}
+              </h2>
+              <p className="panel-text">
+                Cadastre quem poderá atender os agendamentos do negócio.
+              </p>
+            </div>
           </div>
-        )}
 
-        {!carregando && !precisaCadastrarNegocio && (
-          <form className="form" onSubmit={handleSubmit}>
-            <label>
-              Nome do profissional
-              <input
-                onChange={(event) => atualizarCampo('nome', event.target.value)}
-                required
-                type="text"
-                value={form.nome}
-              />
-            </label>
-
-            <label>
-              Especialidade
-              <input
-                onChange={(event) =>
-                  atualizarCampo('especialidade', event.target.value)
-                }
-                type="text"
-                value={form.especialidade}
-              />
-            </label>
-
-            <div className="form-grid">
-              <label>
-                Telefone
-                <input
-                  inputMode="tel"
-                  onChange={(event) =>
-                    atualizarCampo('telefone', event.target.value)
-                  }
-                  type="tel"
-                  value={form.telefone}
-                />
-              </label>
-
-              <label>
-                E-mail
-                <input
-                  inputMode="email"
-                  onChange={(event) =>
-                    atualizarCampo('email', event.target.value)
-                  }
-                  type="email"
-                  value={form.email}
-                />
-              </label>
-            </div>
-
-            <div className="button-row">
-              <button
-                className="button button-primary"
-                disabled={salvando}
-                type="submit"
-              >
-                {salvando ? 'Salvando...' : 'Salvar profissional'}
-              </button>
-
-              {profissionalEditando && (
-                <button
-                  className="button button-secondary"
-                  onClick={cancelarEdicao}
-                  type="button"
-                >
-                  Cancelar edicao
-                </button>
-              )}
-            </div>
-          </form>
-        )}
-      </section>
-
-      <section
-        className="dashboard-panel"
-        aria-labelledby="profissionais-list-title"
-      >
-        <h2 id="profissionais-list-title">Profissionais cadastrados</h2>
-
-        {!carregando &&
-          !precisaCadastrarNegocio &&
-          profissionais.length === 0 && (
-            <p className="panel-text">Nenhum profissional cadastrado ainda.</p>
+          {carregando && (
+            <p className="message message-info" aria-live="polite">
+              Carregando profissionais...
+            </p>
           )}
 
-        <div className="card-list">
-          {profissionais.map((profissional) => (
-            <article className="item-card" key={profissional.id}>
-              <div>
-                <h3>{profissional.nome}</h3>
-                {profissional.especialidade && (
-                  <p>{profissional.especialidade}</p>
-                )}
-              </div>
+          {!carregando && erro && <p className="message message-error">{erro}</p>}
+          {!carregando && sucesso && (
+            <p className="message message-success">{sucesso}</p>
+          )}
 
-              <dl className="meta-list">
-                <div>
-                  <dt>Telefone</dt>
-                  <dd>{profissional.telefone || 'Nao informado'}</dd>
-                </div>
-                <div>
-                  <dt>E-mail</dt>
-                  <dd>{profissional.email || 'Nao informado'}</dd>
-                </div>
-              </dl>
+          {!carregando && precisaCadastrarNegocio && (
+            <div className="dashboard-empty">
+              <span className="empty-icon" aria-hidden="true" />
+              <div>
+                <strong>Cadastre o negócio primeiro</strong>
+                <p>Depois disso, você poderá adicionar profissionais.</p>
+                <button
+                  className="button button-primary button-small"
+                  onClick={() => navigate('/negocio')}
+                  type="button"
+                >
+                  Cadastrar negócio
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!carregando && !precisaCadastrarNegocio && (
+            <form className="form" onSubmit={handleSubmit}>
+              <label>
+                Nome do profissional
+                <input
+                  onChange={(event) =>
+                    atualizarCampo('nome', event.target.value)
+                  }
+                  required
+                  type="text"
+                  value={form.nome}
+                />
+              </label>
+
+              <label>
+                Especialidade
+                <input
+                  onChange={(event) =>
+                    atualizarCampo('especialidade', event.target.value)
+                  }
+                  type="text"
+                  value={form.especialidade}
+                />
+              </label>
+
+              <div className="form-grid">
+                <label>
+                  Telefone
+                  <input
+                    inputMode="tel"
+                    onChange={(event) =>
+                      atualizarCampo('telefone', event.target.value)
+                    }
+                    type="tel"
+                    value={form.telefone}
+                  />
+                </label>
+
+                <label>
+                  E-mail
+                  <input
+                    inputMode="email"
+                    onChange={(event) =>
+                      atualizarCampo('email', event.target.value)
+                    }
+                    type="email"
+                    value={form.email}
+                  />
+                </label>
+              </div>
 
               <div className="button-row">
                 <button
-                  className="button button-secondary"
-                  onClick={() => iniciarEdicao(profissional)}
-                  type="button"
+                  className="button button-primary"
+                  disabled={salvando}
+                  type="submit"
                 >
-                  Editar
+                  {salvando ? 'Salvando...' : 'Salvar profissional'}
                 </button>
-                <button
-                  className="button button-danger"
-                  onClick={() => handleDesativar(profissional)}
-                  type="button"
-                >
-                  Desativar
-                </button>
+
+                {profissionalEditando && (
+                  <button
+                    className="button button-secondary"
+                    onClick={cancelarEdicao}
+                    type="button"
+                  >
+                    Cancelar edição
+                  </button>
+                )}
               </div>
-            </article>
-          ))}
+            </form>
+          )}
+        </div>
+
+        <div className="dashboard-panel management-list-card">
+          <div className="panel-heading">
+            <div>
+              <h2 id="profissionais-list-title">Profissionais cadastrados</h2>
+              <p className="panel-text">
+                Profissionais ativos ficam disponíveis no agendamento público.
+              </p>
+            </div>
+          </div>
+
+          {!carregando &&
+            !precisaCadastrarNegocio &&
+            profissionais.length === 0 && (
+              <div className="dashboard-empty">
+                <span className="empty-icon" aria-hidden="true" />
+                <div>
+                  <strong>Nenhum profissional cadastrado</strong>
+                  <p>Adicione a equipe que atenderá os clientes.</p>
+                </div>
+              </div>
+            )}
+
+          <div className="entity-list">
+            {profissionais.map((profissional) => (
+              <article className="entity-card professional-card" key={profissional.id}>
+                <div className="entity-card-header">
+                  <div className="professional-title">
+                    <span className="entity-avatar" aria-hidden="true">
+                      {profissional.nome?.charAt(0)?.toUpperCase() || 'P'}
+                    </span>
+                    <div>
+                      <h3>{profissional.nome}</h3>
+                      <p>{profissional.especialidade || 'Sem especialidade informada.'}</p>
+                    </div>
+                  </div>
+                  <span className="status-badge status-confirmado">Ativo</span>
+                </div>
+
+                <dl className="meta-list">
+                  <div>
+                    <dt>Telefone</dt>
+                    <dd>{profissional.telefone || 'Não informado'}</dd>
+                  </div>
+                  <div>
+                    <dt>E-mail</dt>
+                    <dd>{profissional.email || 'Não informado'}</dd>
+                  </div>
+                </dl>
+
+                <div className="entity-actions">
+                  <button
+                    className="button button-secondary button-small"
+                    onClick={() => iniciarEdicao(profissional)}
+                    type="button"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="button button-danger button-small"
+                    onClick={() => handleDesativar(profissional)}
+                    type="button"
+                  >
+                    Desativar
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
-    </main>
+    </DashboardShell>
   );
 }
 

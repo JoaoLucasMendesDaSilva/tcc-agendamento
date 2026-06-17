@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import DashboardShell from '../components/DashboardShell';
+import { useAuth } from '../contexts/AuthContext';
 import {
   atualizarNegocio,
   buscarNegocio,
@@ -8,11 +10,11 @@ import {
 const DIAS_SEMANA = [
   { valor: 0, label: 'Domingo' },
   { valor: 1, label: 'Segunda' },
-  { valor: 2, label: 'Terca' },
+  { valor: 2, label: 'Terça' },
   { valor: 3, label: 'Quarta' },
   { valor: 4, label: 'Quinta' },
   { valor: 5, label: 'Sexta' },
-  { valor: 6, label: 'Sabado' },
+  { valor: 6, label: 'Sábado' },
 ];
 
 const FORM_INICIAL = {
@@ -20,7 +22,7 @@ const FORM_INICIAL = {
   descricao: '',
   telefone: '',
   endereco: '',
-  cidade: 'Cubatao',
+  cidade: 'Cubatão',
   horario_abertura: '08:00',
   horario_fechamento: '18:00',
   dias_funcionamento: [1, 2, 3, 4, 5],
@@ -63,6 +65,7 @@ function montarPayload(form) {
 }
 
 function Negocio({ navigate }) {
+  const { logout, usuario } = useAuth();
   const [negocio, setNegocio] = useState(null);
   const [form, setForm] = useState(FORM_INICIAL);
   const [carregando, setCarregando] = useState(true);
@@ -136,7 +139,7 @@ function Negocio({ navigate }) {
 
       setNegocio(resposta.negocio);
       setForm(montarForm(resposta.negocio));
-      setSucesso(resposta.mensagem || 'Negocio salvo com sucesso.');
+      setSucesso(resposta.mensagem || 'Negócio salvo com sucesso.');
     } catch (err) {
       setErro(err.message);
     } finally {
@@ -144,156 +147,202 @@ function Negocio({ navigate }) {
     }
   }
 
+  function handleLogout() {
+    logout();
+    navigate('/login', { replace: true });
+  }
+
   return (
-    <main className="page dashboard-page">
-      <header className="dashboard-header">
+    <DashboardShell
+      currentPath="/negocio"
+      navigate={navigate}
+      onLogout={handleLogout}
+      usuario={usuario}
+    >
+      <header className="page-title">
         <div>
           <p className="eyebrow">Painel do empreendedor</p>
-          <h1>Meu negocio</h1>
+          <h1>Meu negócio</h1>
+          <p className="panel-text">
+            Configure os dados que aparecem para seus clientes.
+          </p>
         </div>
-
-        <button
-          className="button button-secondary"
-          onClick={() => navigate('/dashboard')}
-          type="button"
-        >
-          Voltar
-        </button>
       </header>
 
-      <section className="dashboard-panel" aria-labelledby="negocio-title">
-        <h2 id="negocio-title">
-          {negocio ? 'Editar dados do negocio' : 'Cadastrar negocio'}
-        </h2>
-        <p className="panel-text">
-          Informe os dados basicos que serao usados no agendamento.
-        </p>
-
-        {carregando && (
-          <p className="message message-info" aria-live="polite">
-            Carregando negocio...
-          </p>
-        )}
-
-        {!carregando && erro && <p className="message message-error">{erro}</p>}
-        {!carregando && sucesso && (
-          <p className="message message-success">{sucesso}</p>
-        )}
-
-        {!carregando && negocio && (
-          <div className="summary-box" aria-label="Dados atuais do negocio">
-            <p>
-              <strong>Nome:</strong> {negocio.nome}
-            </p>
-            <p>
-              <strong>Link publico:</strong> {negocio.slug_publico}
-            </p>
-          </div>
-        )}
-
-        {!carregando && (
-          <form className="form" onSubmit={handleSubmit}>
-            <label>
-              Nome do negocio
-              <input
-                onChange={(event) => atualizarCampo('nome', event.target.value)}
-                required
-                type="text"
-                value={form.nome}
-              />
-            </label>
-
-            <label>
-              Descricao
-              <textarea
-                onChange={(event) =>
-                  atualizarCampo('descricao', event.target.value)
-                }
-                rows="4"
-                value={form.descricao}
-              />
-            </label>
-
-            <label>
-              Telefone
-              <input
-                inputMode="tel"
-                onChange={(event) =>
-                  atualizarCampo('telefone', event.target.value)
-                }
-                type="tel"
-                value={form.telefone}
-              />
-            </label>
-
-            <label>
-              Endereco
-              <input
-                onChange={(event) =>
-                  atualizarCampo('endereco', event.target.value)
-                }
-                type="text"
-                value={form.endereco}
-              />
-            </label>
-
-            <label>
-              Cidade
-              <input
-                onChange={(event) => atualizarCampo('cidade', event.target.value)}
-                type="text"
-                value={form.cidade}
-              />
-            </label>
-
-            <div className="form-grid">
-              <label>
-                Abertura
-                <input
-                  onChange={(event) =>
-                    atualizarCampo('horario_abertura', event.target.value)
-                  }
-                  required
-                  type="time"
-                  value={form.horario_abertura}
-                />
-              </label>
-
-              <label>
-                Fechamento
-                <input
-                  onChange={(event) =>
-                    atualizarCampo('horario_fechamento', event.target.value)
-                  }
-                  required
-                  type="time"
-                  value={form.horario_fechamento}
-                />
-              </label>
+      <section className="management-grid" aria-labelledby="negocio-title">
+        <div className="dashboard-panel management-form-card">
+          <div className="panel-heading">
+            <div>
+              <h2 id="negocio-title">
+                {negocio ? 'Editar dados do negócio' : 'Cadastrar negócio'}
+              </h2>
+              <p className="panel-text">
+                Informe os dados básicos usados no agendamento público.
+              </p>
             </div>
+          </div>
 
-            <fieldset className="checkbox-group">
-              <legend>Dias de funcionamento</legend>
+          {carregando && (
+            <p className="message message-info" aria-live="polite">
+              Carregando negócio...
+            </p>
+          )}
 
-              {DIAS_SEMANA.map((dia) => (
-                <label className="checkbox-label" key={dia.valor}>
+          {!carregando && erro && <p className="message message-error">{erro}</p>}
+          {!carregando && sucesso && (
+            <p className="message message-success">{sucesso}</p>
+          )}
+
+          {!carregando && (
+            <form className="form" onSubmit={handleSubmit}>
+              <fieldset className="form-section">
+                <legend>Dados do negócio</legend>
+
+                <label>
+                  Nome do negócio
                   <input
-                    checked={form.dias_funcionamento.includes(dia.valor)}
-                    onChange={() => alternarDia(dia.valor)}
-                    type="checkbox"
+                    onChange={(event) =>
+                      atualizarCampo('nome', event.target.value)
+                    }
+                    required
+                    type="text"
+                    value={form.nome}
                   />
-                  {dia.label}
                 </label>
-              ))}
-            </fieldset>
 
-            <button className="button button-primary" disabled={salvando} type="submit">
-              {salvando ? 'Salvando...' : 'Salvar negocio'}
-            </button>
-          </form>
-        )}
+                <label>
+                  Descrição
+                  <textarea
+                    onChange={(event) =>
+                      atualizarCampo('descricao', event.target.value)
+                    }
+                    rows="4"
+                    value={form.descricao}
+                  />
+                </label>
+
+                <div className="form-grid">
+                  <label>
+                    Telefone
+                    <input
+                      inputMode="tel"
+                      onChange={(event) =>
+                        atualizarCampo('telefone', event.target.value)
+                      }
+                      type="tel"
+                      value={form.telefone}
+                    />
+                  </label>
+
+                  <label>
+                    Cidade
+                    <input
+                      onChange={(event) =>
+                        atualizarCampo('cidade', event.target.value)
+                      }
+                      type="text"
+                      value={form.cidade}
+                    />
+                  </label>
+                </div>
+
+                <label>
+                  Endereço
+                  <input
+                    onChange={(event) =>
+                      atualizarCampo('endereco', event.target.value)
+                    }
+                    type="text"
+                    value={form.endereco}
+                  />
+                </label>
+              </fieldset>
+
+              <fieldset className="form-section">
+                <legend>Horários</legend>
+
+                <div className="form-grid">
+                  <label>
+                    Horário de abertura
+                    <input
+                      onChange={(event) =>
+                        atualizarCampo('horario_abertura', event.target.value)
+                      }
+                      required
+                      type="time"
+                      value={form.horario_abertura}
+                    />
+                  </label>
+
+                  <label>
+                    Horário de fechamento
+                    <input
+                      onChange={(event) =>
+                        atualizarCampo('horario_fechamento', event.target.value)
+                      }
+                      required
+                      type="time"
+                      value={form.horario_fechamento}
+                    />
+                  </label>
+                </div>
+              </fieldset>
+
+              <fieldset className="form-section">
+                <legend>Dias de funcionamento</legend>
+                <div className="day-selector">
+                  {DIAS_SEMANA.map((dia) => (
+                    <label className="day-pill" key={dia.valor}>
+                      <input
+                        checked={form.dias_funcionamento.includes(dia.valor)}
+                        onChange={() => alternarDia(dia.valor)}
+                        type="checkbox"
+                      />
+                      <span>{dia.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <button
+                className="button button-primary"
+                disabled={salvando}
+                type="submit"
+              >
+                {salvando ? 'Salvando...' : 'Salvar negócio'}
+              </button>
+            </form>
+          )}
+        </div>
+
+        <aside className="dashboard-panel management-summary">
+          <span className="summary-icon" aria-hidden="true" />
+          <h2>Status do negócio</h2>
+          <p className="panel-text">
+            {negocio
+              ? 'Seu negócio já está configurado para receber agendamentos.'
+              : 'Cadastre seu negócio para liberar serviços, profissionais e agenda.'}
+          </p>
+
+          {negocio && (
+            <dl className="details-list compact-details">
+              <div>
+                <dt>Nome</dt>
+                <dd>{negocio.nome}</dd>
+              </div>
+              <div>
+                <dt>Link público</dt>
+                <dd>{negocio.slug_publico}</dd>
+              </div>
+              <div>
+                <dt>Cidade</dt>
+                <dd>{negocio.cidade || 'Não informada'}</dd>
+              </div>
+            </dl>
+          )}
+        </aside>
       </section>
-    </main>
+    </DashboardShell>
   );
 }
 

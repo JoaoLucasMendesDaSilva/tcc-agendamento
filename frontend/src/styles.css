@@ -671,6 +671,45 @@ textarea:focus {
   gap: 18px;
 }
 
+.management-grid {
+  display: grid;
+  gap: 18px;
+  align-items: start;
+}
+
+.agenda-panel {
+  max-width: 980px;
+}
+
+.management-form-card,
+.management-list-card,
+.management-summary {
+  width: 100%;
+}
+
+.management-summary {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.summary-icon {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--green-100);
+}
+
+.summary-icon::before {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--green-800);
+  border-radius: 7px;
+  content: "";
+}
+
 .panel-heading {
   display: grid;
   gap: 14px;
@@ -937,6 +976,23 @@ textarea:focus {
   background: #fbfcfd;
 }
 
+.form-section {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  border: 1px solid rgba(223, 229, 236, 0.86);
+  border-radius: 16px;
+  padding: 16px;
+  background: #fbfcfd;
+}
+
+.form-section legend {
+  padding: 0 6px;
+  color: var(--gray-900);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
 .form-grid,
 .button-row,
 .filter-row {
@@ -976,10 +1032,58 @@ textarea:focus {
   min-height: 20px;
 }
 
+.day-selector {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.day-pill {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+.day-pill input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.day-pill span {
+  display: grid;
+  min-height: 44px;
+  place-items: center;
+  border: 1px solid var(--gray-300);
+  border-radius: 999px;
+  padding: 10px 12px;
+  color: var(--gray-700);
+  background: var(--white);
+  font-size: 0.86rem;
+  font-weight: 600;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.day-pill input:checked + span {
+  border-color: rgba(0, 127, 111, 0.38);
+  color: var(--green-800);
+  background: var(--green-100);
+  box-shadow: 0 0 0 4px rgba(0, 127, 111, 0.08);
+}
+
+.day-pill input:focus-visible + span {
+  outline: 3px solid rgba(0, 127, 111, 0.18);
+  outline-offset: 2px;
+}
+
 .empty-state {
   display: grid;
   gap: 16px;
   margin-top: 20px;
+}
+
+.dashboard-empty .button {
+  margin-top: 14px;
 }
 
 .card-list {
@@ -1001,6 +1105,85 @@ textarea:focus {
 .item-card h3 {
   margin: 0 0 6px;
   font-size: 1.1rem;
+}
+
+.entity-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.entity-card {
+  display: grid;
+  gap: 16px;
+  border: 1px solid rgba(223, 229, 236, 0.84);
+  border-radius: var(--radius);
+  padding: 16px;
+  background: var(--white);
+  box-shadow: var(--shadow-card);
+}
+
+.entity-card-header {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+
+.entity-card-header h3 {
+  margin-bottom: 4px;
+  font-size: 1.02rem;
+}
+
+.entity-card-header p {
+  color: var(--gray-500);
+  font-size: 0.9rem;
+}
+
+.entity-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.agenda-actions {
+  display: grid;
+  gap: 12px;
+}
+
+.agenda-actions .button {
+  align-self: end;
+}
+
+.professional-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.entity-avatar {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--green-800);
+  background: var(--green-100);
+  font-weight: 700;
+}
+
+.compact-details {
+  margin-top: 10px;
+}
+
+.compact-details div {
+  border-top: 1px solid var(--gray-300);
+  padding-top: 12px;
+}
+
+.compact-details dd {
+  font-weight: 600;
 }
 
 .meta-list {
@@ -1161,6 +1344,23 @@ textarea:focus {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .day-selector {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .entity-card-header {
+    grid-template-columns: 1fr auto;
+  }
+
+  .entity-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .agenda-actions {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+
   .shortcut-strip {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -1215,5 +1415,9 @@ textarea:focus {
 
   .dashboard-grid {
     grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.75fr);
+  }
+
+  .management-grid {
+    grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
   }
 }

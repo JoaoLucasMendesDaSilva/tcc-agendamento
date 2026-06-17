@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import DashboardShell from '../components/DashboardShell';
+import { useAuth } from '../contexts/AuthContext';
 import {
   atualizarServico,
   criarServico,
@@ -50,6 +52,7 @@ function normalizarMensagem(texto) {
 }
 
 function Servicos({ navigate }) {
+  const { logout, usuario } = useAuth();
   const [servicos, setServicos] = useState([]);
   const [servicoEditando, setServicoEditando] = useState(null);
   const [form, setForm] = useState(FORM_INICIAL);
@@ -115,7 +118,7 @@ function Servicos({ navigate }) {
         ? await atualizarServico(servicoEditando.id, payload)
         : await criarServico(payload);
 
-      setSucesso(resposta.mensagem || 'Servico salvo com sucesso.');
+      setSucesso(resposta.mensagem || 'Serviço salvo com sucesso.');
       setServicoEditando(null);
       setForm(FORM_INICIAL);
       await carregarServicos();
@@ -128,7 +131,7 @@ function Servicos({ navigate }) {
 
   async function handleDesativar(servico) {
     const confirmado = window.confirm(
-      `Deseja desativar o servico "${servico.nome}"?`
+      `Deseja desativar o serviço "${servico.nome}"?`
     );
 
     if (!confirmado) {
@@ -140,7 +143,7 @@ function Servicos({ navigate }) {
 
     try {
       const resposta = await desativarServico(servico.id);
-      setSucesso(resposta.mensagem || 'Servico desativado com sucesso.');
+      setSucesso(resposta.mensagem || 'Serviço desativado com sucesso.');
 
       if (servicoEditando?.id === servico.id) {
         cancelarEdicao();
@@ -152,175 +155,210 @@ function Servicos({ navigate }) {
     }
   }
 
+  function handleLogout() {
+    logout();
+    navigate('/login', { replace: true });
+  }
+
   return (
-    <main className="page dashboard-page">
-      <header className="dashboard-header">
+    <DashboardShell
+      currentPath="/servicos"
+      navigate={navigate}
+      onLogout={handleLogout}
+      usuario={usuario}
+    >
+      <header className="page-title">
         <div>
           <p className="eyebrow">Painel do empreendedor</p>
-          <h1>Servicos</h1>
+          <h1>Serviços</h1>
+          <p className="panel-text">
+            Organize os serviços disponíveis para agendamento.
+          </p>
         </div>
-
-        <button
-          className="button button-secondary"
-          onClick={() => navigate('/dashboard')}
-          type="button"
-        >
-          Voltar
-        </button>
       </header>
 
-      <section className="dashboard-panel" aria-labelledby="servicos-form-title">
-        <h2 id="servicos-form-title">
-          {servicoEditando ? 'Editar servico' : 'Novo servico'}
-        </h2>
-        <p className="panel-text">
-          Cadastre os servicos que os clientes poderao agendar.
-        </p>
-
-        {carregando && (
-          <p className="message message-info" aria-live="polite">
-            Carregando servicos...
-          </p>
-        )}
-
-        {!carregando && erro && <p className="message message-error">{erro}</p>}
-        {!carregando && sucesso && (
-          <p className="message message-success">{sucesso}</p>
-        )}
-
-        {!carregando && precisaCadastrarNegocio && (
-          <div className="empty-state">
-            <p>Cadastre o negocio antes de adicionar servicos.</p>
-            <button
-              className="button button-primary"
-              onClick={() => navigate('/negocio')}
-              type="button"
-            >
-              Cadastrar negocio
-            </button>
-          </div>
-        )}
-
-        {!carregando && !precisaCadastrarNegocio && (
-          <form className="form" onSubmit={handleSubmit}>
-            <label>
-              Nome do servico
-              <input
-                onChange={(event) => atualizarCampo('nome', event.target.value)}
-                required
-                type="text"
-                value={form.nome}
-              />
-            </label>
-
-            <label>
-              Descricao
-              <textarea
-                onChange={(event) =>
-                  atualizarCampo('descricao', event.target.value)
-                }
-                rows="3"
-                value={form.descricao}
-              />
-            </label>
-
-            <div className="form-grid">
-              <label>
-                Duracao em minutos
-                <input
-                  min="1"
-                  onChange={(event) =>
-                    atualizarCampo('duracao_minutos', event.target.value)
-                  }
-                  required
-                  type="number"
-                  value={form.duracao_minutos}
-                />
-              </label>
-
-              <label>
-                Preco
-                <input
-                  min="0"
-                  onChange={(event) => atualizarCampo('preco', event.target.value)}
-                  required
-                  step="0.01"
-                  type="number"
-                  value={form.preco}
-                />
-              </label>
+      <section className="management-grid">
+        <div className="dashboard-panel management-form-card">
+          <div className="panel-heading">
+            <div>
+              <h2 id="servicos-form-title">
+                {servicoEditando ? 'Editar serviço' : 'Novo serviço'}
+              </h2>
+              <p className="panel-text">
+                Cadastre os serviços que seus clientes poderão agendar.
+              </p>
             </div>
+          </div>
 
-            <div className="button-row">
-              <button
-                className="button button-primary"
-                disabled={salvando}
-                type="submit"
-              >
-                {salvando ? 'Salvando...' : 'Salvar servico'}
-              </button>
+          {carregando && (
+            <p className="message message-info" aria-live="polite">
+              Carregando serviços...
+            </p>
+          )}
 
-              {servicoEditando && (
+          {!carregando && erro && <p className="message message-error">{erro}</p>}
+          {!carregando && sucesso && (
+            <p className="message message-success">{sucesso}</p>
+          )}
+
+          {!carregando && precisaCadastrarNegocio && (
+            <div className="dashboard-empty">
+              <span className="empty-icon" aria-hidden="true" />
+              <div>
+                <strong>Cadastre o negócio primeiro</strong>
+                <p>Depois disso, você poderá adicionar serviços.</p>
                 <button
-                  className="button button-secondary"
-                  onClick={cancelarEdicao}
+                  className="button button-primary button-small"
+                  onClick={() => navigate('/negocio')}
                   type="button"
                 >
-                  Cancelar edicao
+                  Cadastrar negócio
                 </button>
-              )}
-            </div>
-          </form>
-        )}
-      </section>
-
-      <section className="dashboard-panel" aria-labelledby="servicos-list-title">
-        <h2 id="servicos-list-title">Servicos cadastrados</h2>
-
-        {!carregando && !precisaCadastrarNegocio && servicos.length === 0 && (
-          <p className="panel-text">Nenhum servico cadastrado ainda.</p>
-        )}
-
-        <div className="card-list">
-          {servicos.map((servico) => (
-            <article className="item-card" key={servico.id}>
-              <div>
-                <h3>{servico.nome}</h3>
-                {servico.descricao && <p>{servico.descricao}</p>}
               </div>
+            </div>
+          )}
 
-              <dl className="meta-list">
-                <div>
-                  <dt>Duracao</dt>
-                  <dd>{servico.duracao_minutos} min</dd>
-                </div>
-                <div>
-                  <dt>Preco</dt>
-                  <dd>{formatarPreco(servico.preco)}</dd>
-                </div>
-              </dl>
+          {!carregando && !precisaCadastrarNegocio && (
+            <form className="form" onSubmit={handleSubmit}>
+              <label>
+                Nome do serviço
+                <input
+                  onChange={(event) =>
+                    atualizarCampo('nome', event.target.value)
+                  }
+                  required
+                  type="text"
+                  value={form.nome}
+                />
+              </label>
+
+              <label>
+                Descrição
+                <textarea
+                  onChange={(event) =>
+                    atualizarCampo('descricao', event.target.value)
+                  }
+                  rows="3"
+                  value={form.descricao}
+                />
+              </label>
+
+              <div className="form-grid">
+                <label>
+                  Duração em minutos
+                  <input
+                    min="1"
+                    onChange={(event) =>
+                      atualizarCampo('duracao_minutos', event.target.value)
+                    }
+                    required
+                    type="number"
+                    value={form.duracao_minutos}
+                  />
+                </label>
+
+                <label>
+                  Preço
+                  <input
+                    min="0"
+                    onChange={(event) =>
+                      atualizarCampo('preco', event.target.value)
+                    }
+                    required
+                    step="0.01"
+                    type="number"
+                    value={form.preco}
+                  />
+                </label>
+              </div>
 
               <div className="button-row">
                 <button
-                  className="button button-secondary"
-                  onClick={() => iniciarEdicao(servico)}
-                  type="button"
+                  className="button button-primary"
+                  disabled={salvando}
+                  type="submit"
                 >
-                  Editar
+                  {salvando ? 'Salvando...' : 'Salvar serviço'}
                 </button>
-                <button
-                  className="button button-danger"
-                  onClick={() => handleDesativar(servico)}
-                  type="button"
-                >
-                  Desativar
-                </button>
+
+                {servicoEditando && (
+                  <button
+                    className="button button-secondary"
+                    onClick={cancelarEdicao}
+                    type="button"
+                  >
+                    Cancelar edição
+                  </button>
+                )}
               </div>
-            </article>
-          ))}
+            </form>
+          )}
+        </div>
+
+        <div className="dashboard-panel management-list-card">
+          <div className="panel-heading">
+            <div>
+              <h2 id="servicos-list-title">Serviços cadastrados</h2>
+              <p className="panel-text">
+                Serviços ativos aparecem no fluxo público de agendamento.
+              </p>
+            </div>
+          </div>
+
+          {!carregando && !precisaCadastrarNegocio && servicos.length === 0 && (
+            <div className="dashboard-empty">
+              <span className="empty-icon" aria-hidden="true" />
+              <div>
+                <strong>Nenhum serviço cadastrado</strong>
+                <p>Adicione o primeiro serviço para começar a receber horários.</p>
+              </div>
+            </div>
+          )}
+
+          <div className="entity-list">
+            {servicos.map((servico) => (
+              <article className="entity-card" key={servico.id}>
+                <div className="entity-card-header">
+                  <div>
+                    <h3>{servico.nome}</h3>
+                    <p>{servico.descricao || 'Sem descrição informada.'}</p>
+                  </div>
+                  <span className="status-badge status-confirmado">Ativo</span>
+                </div>
+
+                <dl className="meta-list">
+                  <div>
+                    <dt>Duração</dt>
+                    <dd>{servico.duracao_minutos} min</dd>
+                  </div>
+                  <div>
+                    <dt>Preço</dt>
+                    <dd>{formatarPreco(servico.preco)}</dd>
+                  </div>
+                </dl>
+
+                <div className="entity-actions">
+                  <button
+                    className="button button-secondary button-small"
+                    onClick={() => iniciarEdicao(servico)}
+                    type="button"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="button button-danger button-small"
+                    onClick={() => handleDesativar(servico)}
+                    type="button"
+                  >
+                    Desativar
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
-    </main>
+    </DashboardShell>
   );
 }
 
