@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  CalendarX,
+  CheckCircle2,
+  Scissors,
+  Users,
+} from 'lucide-react';
+import {
   buscarNegocioPublico,
   criarAgendamentoPublico,
   listarHorariosDisponiveis,
@@ -351,7 +357,9 @@ function AgendamentoPublico({ slugOuId }) {
               className="booking-section confirmation-card"
               aria-labelledby="confirmacao-title"
             >
-              <span className="confirmation-icon" aria-hidden="true" />
+              <span className="confirmation-icon" aria-hidden="true">
+                <CheckCircle2 size={24} strokeWidth={2} />
+              </span>
               <div>
                 <p className="step-label">Confirmação</p>
                 <h2 id="confirmacao-title">Agendamento confirmado</h2>
@@ -398,7 +406,9 @@ function AgendamentoPublico({ slugOuId }) {
 
             {servicos.length === 0 && (
               <div className="dashboard-empty">
-                <span className="empty-icon" aria-hidden="true" />
+                <span className="empty-icon" aria-hidden="true">
+                  <Scissors size={24} strokeWidth={2} />
+                </span>
                 <div>
                   <strong>Nenhum serviço disponível</strong>
                   <p>Este negócio ainda não possui serviços para agendamento.</p>
@@ -437,7 +447,9 @@ function AgendamentoPublico({ slugOuId }) {
 
               {profissionais.length === 0 && (
                 <div className="dashboard-empty">
-                  <span className="empty-icon" aria-hidden="true" />
+                  <span className="empty-icon" aria-hidden="true">
+                    <Users size={24} strokeWidth={2} />
+                  </span>
                   <div>
                     <strong>Nenhum profissional disponível</strong>
                     <p>Este negócio ainda não possui profissionais ativos.</p>
@@ -503,7 +515,9 @@ function AgendamentoPublico({ slugOuId }) {
 
               {!carregandoHorarios && horarios.length === 0 && (
                 <div className="dashboard-empty">
-                  <span className="empty-icon" aria-hidden="true" />
+                  <span className="empty-icon" aria-hidden="true">
+                    <CalendarX size={24} strokeWidth={2} />
+                  </span>
                   <div>
                     <strong>Nenhum horário disponível</strong>
                     <p>Escolha outra data para consultar novos horários.</p>

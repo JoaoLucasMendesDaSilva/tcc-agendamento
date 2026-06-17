@@ -490,6 +490,8 @@ textarea:focus {
   display: inline-flex;
   align-items: center;
   gap: 9px;
+  width: 100%;
+  min-width: 0;
   min-height: 44px;
   border: 0;
   border-radius: 10px;
@@ -507,6 +509,14 @@ textarea:focus {
     transform 180ms ease;
 }
 
+.sidebar-label {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .sidebar-link:hover {
   background: var(--green-50);
   color: var(--green-800);
@@ -514,6 +524,8 @@ textarea:focus {
 }
 
 .sidebar-link.is-active {
+  align-items: center;
+  justify-content: flex-start;
   color: var(--white);
   background: linear-gradient(180deg, #00816f, var(--green-800));
   box-shadow: 0 12px 22px rgba(0, 127, 111, 0.2);
@@ -1041,10 +1053,11 @@ textarea:focus {
   height: 58px;
   place-items: center;
   border-radius: 18px;
+  color: var(--green-800);
   background: var(--green-100);
 }
 
-.confirmation-icon::before {
+.confirmation-icon:empty::before {
   width: 24px;
   height: 14px;
   border-bottom: 4px solid var(--green-800);
@@ -1893,7 +1906,10 @@ textarea:focus {
     justify-content: center;
     gap: 0;
     padding-inline: 8px;
-    font-size: 0;
+  }
+
+  .app-shell.is-sidebar-collapsed .sidebar-label {
+    display: none;
   }
 
   .app-shell.is-sidebar-collapsed .sidebar-icon {

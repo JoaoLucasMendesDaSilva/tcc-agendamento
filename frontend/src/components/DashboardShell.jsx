@@ -78,7 +78,7 @@ function DashboardShell({
                 <span className="sidebar-icon" aria-hidden="true">
                   <Icon size={19} strokeWidth={2} />
                 </span>
-                {item.label}
+                <span className="sidebar-label">{item.label}</span>
               </button>
             );
           })}
@@ -93,7 +93,7 @@ function DashboardShell({
           <span className="sidebar-icon" aria-hidden="true">
             <LogOut size={19} strokeWidth={2} />
           </span>
-          Sair
+          <span className="sidebar-label">Sair</span>
         </button>
       </aside>
 
