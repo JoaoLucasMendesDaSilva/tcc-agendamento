@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import AuthLayout from '../components/AuthLayout';
+import BrandLogo from '../components/BrandLogo';
 import { useAuth } from '../contexts/AuthContext';
 
 function Cadastro({ navigate }) {
@@ -33,7 +35,7 @@ function Cadastro({ navigate }) {
         telefone: form.telefone || undefined,
         senha: form.senha,
       });
-      setSucesso('Cadastro realizado com sucesso. Agora faca login.');
+      setSucesso('Cadastro realizado com sucesso. Agora faça login.');
       setForm({ nome: '', email: '', telefone: '', senha: '' });
     } catch (err) {
       setErro(err.message);
@@ -43,8 +45,9 @@ function Cadastro({ navigate }) {
   }
 
   return (
-    <main className="page page-center">
+    <AuthLayout mode="cadastro">
       <section className="auth-panel" aria-labelledby="cadastro-title">
+        <BrandLogo />
         <p className="eyebrow">Primeiro acesso</p>
         <h1 id="cadastro-title">Cadastro</h1>
         <p className="panel-text">
@@ -107,10 +110,10 @@ function Cadastro({ navigate }) {
         </form>
 
         <button className="button button-link" onClick={() => navigate('/login')} type="button">
-          Ja tenho conta
+          Já tenho conta
         </button>
       </section>
-    </main>
+    </AuthLayout>
   );
 }
 

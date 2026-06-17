@@ -1,3 +1,4 @@
+import DashboardShell from '../components/DashboardShell';
 import { useAuth } from '../contexts/AuthContext';
 
 function Dashboard({ navigate }) {
@@ -9,60 +10,114 @@ function Dashboard({ navigate }) {
   }
 
   return (
-    <main className="page dashboard-page">
-      <header className="dashboard-header">
+    <DashboardShell
+      currentPath="/dashboard"
+      navigate={navigate}
+      onLogout={handleLogout}
+      usuario={usuario}
+    >
+      <header className="page-title">
         <div>
-          <p className="eyebrow">Painel do empreendedor</p>
-          <h1>Ola, {usuario?.nome}</h1>
+          <p className="eyebrow">Visão geral do seu negócio</p>
+          <h1>Dashboard</h1>
         </div>
-
-        <button className="button button-secondary" onClick={handleLogout} type="button">
-          Sair
-        </button>
       </header>
 
-      <section className="dashboard-panel" aria-labelledby="dashboard-title">
-        <h2 id="dashboard-title">MVP em construcao</h2>
-        <p>
-          Sua sessao esta ativa. As proximas etapas vao adicionar cadastro do
-          negocio, servicos, profissionais e agenda.
-        </p>
-
-        <div className="action-list">
-          <button
-            className="button button-primary"
-            onClick={() => navigate('/negocio')}
-            type="button"
-          >
-            Meu negocio
-          </button>
-
-          <button
-            className="button button-secondary"
-            onClick={() => navigate('/servicos')}
-            type="button"
-          >
-            Servicos
-          </button>
-
-          <button
-            className="button button-secondary"
-            onClick={() => navigate('/profissionais')}
-            type="button"
-          >
-            Profissionais
-          </button>
-
-          <button
-            className="button button-secondary"
-            onClick={() => navigate('/agenda')}
-            type="button"
-          >
-            Agenda
-          </button>
-        </div>
+      <section className="metrics-grid" aria-label="Atalhos principais">
+        <button className="metric-card metric-action" onClick={() => navigate('/negocio')} type="button">
+          <span className="metric-icon" aria-hidden="true" />
+          <div>
+            <p>Meu negócio</p>
+            <strong>Dados do negócio</strong>
+            <small>Horários, cidade e link público</small>
+          </div>
+        </button>
+        <button className="metric-card metric-action" onClick={() => navigate('/servicos')} type="button">
+          <span className="metric-icon metric-yellow" aria-hidden="true" />
+          <div>
+            <p>Serviços</p>
+            <strong>Catálogo</strong>
+            <small>Preços e duração dos atendimentos</small>
+          </div>
+        </button>
+        <button className="metric-card metric-action" onClick={() => navigate('/profissionais')} type="button">
+          <span className="metric-icon metric-blue" aria-hidden="true" />
+          <div>
+            <p>Profissionais</p>
+            <strong>Equipe</strong>
+            <small>Pessoas disponíveis para atender</small>
+          </div>
+        </button>
+        <button className="metric-card metric-action" onClick={() => navigate('/agenda')} type="button">
+          <span className="metric-icon" aria-hidden="true" />
+          <div>
+            <p>Agenda</p>
+            <strong>Agendamentos</strong>
+            <small>Status e cancelamentos</small>
+          </div>
+        </button>
       </section>
-    </main>
+
+      <section className="dashboard-grid">
+        <article className="dashboard-panel" aria-labelledby="next-title">
+          <div className="panel-heading">
+            <div>
+              <h2 id="next-title">Resumo da agenda</h2>
+              <p className="panel-text">Acompanhe os horários reais pela tela de agenda.</p>
+            </div>
+            <button
+              className="button button-secondary button-small"
+              onClick={() => navigate('/agenda')}
+              type="button"
+            >
+              Ver agenda
+            </button>
+          </div>
+
+          <div className="dashboard-empty">
+            <span className="empty-icon" aria-hidden="true" />
+            <div>
+              <strong>Agenda pronta para uso</strong>
+              <p>Use a área de agenda para visualizar clientes, serviços, profissionais, horários e status dos agendamentos cadastrados.</p>
+            </div>
+          </div>
+        </article>
+
+        <article className="dashboard-panel" aria-labelledby="status-title">
+          <h2 id="status-title">Atalhos rápidos</h2>
+          <p className="panel-text">Continue a configuração do sistema sem perder tempo.</p>
+          <div className="status-summary status-actions">
+            <button className="status-action" onClick={() => navigate('/servicos')} type="button">
+              <span className="dot dot-green" /> Cadastrar serviços
+            </button>
+            <button className="status-action" onClick={() => navigate('/profissionais')} type="button">
+              <span className="dot dot-blue" /> Cadastrar profissionais
+            </button>
+            <button className="status-action" onClick={() => navigate('/agenda')} type="button">
+              <span className="dot dot-yellow" /> Ver agenda
+            </button>
+          </div>
+        </article>
+      </section>
+
+      <section className="shortcut-strip" aria-label="Atalhos do sistema">
+        <button className="quick-action" onClick={() => navigate('/negocio')} type="button">
+          <span className="quick-icon">N</span>
+          <strong>Meu negócio</strong>
+          <small>Dados e link público</small>
+        </button>
+        <button className="quick-action" onClick={() => navigate('/servicos')} type="button">
+          <span className="quick-icon">S</span>
+          <strong>Serviços</strong>
+          <small>Preços e duração</small>
+        </button>
+        <button className="quick-action" onClick={() => navigate('/profissionais')} type="button">
+          <span className="quick-icon">P</span>
+          <strong>Profissionais</strong>
+          <small>Equipe de atendimento</small>
+        </button>
+      </section>
+    </DashboardShell>
   );
 }
 

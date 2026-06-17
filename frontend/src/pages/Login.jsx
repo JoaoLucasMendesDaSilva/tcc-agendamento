@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import AuthLayout from '../components/AuthLayout';
+import BrandLogo from '../components/BrandLogo';
 import { useAuth } from '../contexts/AuthContext';
 
 function Login({ navigate }) {
@@ -24,12 +26,13 @@ function Login({ navigate }) {
   }
 
   return (
-    <main className="page page-center">
+    <AuthLayout>
       <section className="auth-panel" aria-labelledby="login-title">
-        <p className="eyebrow">Area do empreendedor</p>
+        <BrandLogo />
+        <p className="eyebrow">Bem-vindo de volta!</p>
         <h1 id="login-title">Entrar</h1>
         <p className="panel-text">
-          Acesse seu painel para acompanhar o sistema de agendamento.
+          Faça login para acessar sua conta.
         </p>
 
         <form className="form" onSubmit={handleSubmit}>
@@ -65,10 +68,10 @@ function Login({ navigate }) {
         </form>
 
         <button className="button button-link" onClick={() => navigate('/cadastro')} type="button">
-          Criar minha conta
+          Não tem uma conta? Cadastre-se
         </button>
       </section>
-    </main>
+    </AuthLayout>
   );
 }
 
