@@ -1,3 +1,5 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Chart } from 'chart.js/auto';
 import {
   CalendarCheck,
   CalendarDays,
@@ -7,14 +9,306 @@ import {
 } from 'lucide-react';
 import DashboardShell from '../components/DashboardShell';
 import { useAuth } from '../contexts/AuthContext';
+import { listarAgendamentos } from '../services/agendamentosService';
+import { listarProfissionais } from '../services/profissionaisService';
+import { listarServicos } from '../services/servicosService';
+
+const DIAS_SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const STATUS_ATIVOS_AGENDA = ['pendente', 'confirmado'];
+
+function obterData(agendamento) {
+  const data = new Date(agendamento.data_hora_inicio);
+  return Number.isNaN(data.getTime()) ? null : data;
+}
+
+function formatarData(data) {
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(data);
+}
+
+function formatarHorario(data) {
+  return new Intl.DateTimeFormat('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(data);
+}
+
+function criarChaveCliente(agendamento) {
+  const telefone = String(agendamento.cliente_telefone || '').replace(/\D/g, '');
+  const email = String(agendamento.cliente_email || '').trim().toLowerCase();
+  const nome = String(agendamento.cliente_nome || '').trim().toLowerCase();
+
+  return telefone || email || nome;
+}
+
+function contarClientesUnicos(agendamentos) {
+  const clientes = new Set();
+
+  agendamentos.forEach((agendamento) => {
+    const chave = criarChaveCliente(agendamento);
+
+    if (chave) {
+      clientes.add(chave);
+    }
+  });
+
+  return clientes.size;
+}
+
+function encontrarProximoAgendamento(agendamentos) {
+  const agora = new Date();
+
+  return agendamentos
+    .filter((agendamento) => STATUS_ATIVOS_AGENDA.includes(agendamento.status))
+    .map((agendamento) => ({
+      ...agendamento,
+      dataInicio: obterData(agendamento),
+    }))
+    .filter((agendamento) => agendamento.dataInicio && agendamento.dataInicio >= agora)
+    .sort((a, b) => a.dataInicio - b.dataInicio)[0];
+}
+
+function obterInicioSemana(dataBase) {
+  const inicio = new Date(dataBase);
+  inicio.setHours(0, 0, 0, 0);
+  inicio.setDate(inicio.getDate() - inicio.getDay());
+  return inicio;
+}
+
+function montarDadosSemana(agendamentos) {
+  const inicioSemana = obterInicioSemana(new Date());
+  const fimSemana = new Date(inicioSemana);
+  fimSemana.setDate(inicioSemana.getDate() + 7);
+
+  const valores = DIAS_SEMANA.map((label, index) => {
+    const data = new Date(inicioSemana);
+    data.setDate(inicioSemana.getDate() + index);
+
+    return {
+      label,
+      data,
+      total: 0,
+    };
+  });
+
+  agendamentos.forEach((agendamento) => {
+    const data = obterData(agendamento);
+
+    if (!data || data < inicioSemana || data >= fimSemana) {
+      return;
+    }
+
+    valores[data.getDay()].total += 1;
+  });
+
+  return valores;
+}
+
+function MetricCard({ Icone, classeIcone = '', titulo, valor, detalhe }) {
+  return (
+    <article className="metric-card">
+      <span className={`metric-icon ${classeIcone}`} aria-hidden="true">
+        <Icone size={22} strokeWidth={2} />
+      </span>
+      <div>
+        <p>{titulo}</p>
+        <strong>{valor}</strong>
+        <small>{detalhe}</small>
+      </div>
+    </article>
+  );
+}
 
 function Dashboard({ navigate }) {
   const { logout, usuario } = useAuth();
+  const chartRef = useRef(null);
+  const chartInstanceRef = useRef(null);
+  const [agendamentos, setAgendamentos] = useState([]);
+  const [servicos, setServicos] = useState([]);
+  const [profissionais, setProfissionais] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState('');
+
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregarIndicadores() {
+      setCarregando(true);
+      setErro('');
+
+      const [resultadoAgendamentos, resultadoServicos, resultadoProfissionais] =
+        await Promise.allSettled([
+          listarAgendamentos(),
+          listarServicos(),
+          listarProfissionais(),
+        ]);
+
+      if (!ativo) {
+        return;
+      }
+
+      setAgendamentos(
+        resultadoAgendamentos.status === 'fulfilled'
+          ? resultadoAgendamentos.value.agendamentos || []
+          : [],
+      );
+      setServicos(
+        resultadoServicos.status === 'fulfilled'
+          ? resultadoServicos.value.servicos || []
+          : [],
+      );
+      setProfissionais(
+        resultadoProfissionais.status === 'fulfilled'
+          ? resultadoProfissionais.value.profissionais || []
+          : [],
+      );
+
+      const primeiraFalha = [
+        resultadoAgendamentos,
+        resultadoServicos,
+        resultadoProfissionais,
+      ].find((resultado) => resultado.status === 'rejected');
+
+      if (primeiraFalha) {
+        setErro(
+          primeiraFalha.reason?.message ||
+            'Não foi possível carregar todos os indicadores.',
+        );
+      }
+
+      setCarregando(false);
+    }
+
+    carregarIndicadores();
+
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
+  const proximoAgendamento = useMemo(
+    () => encontrarProximoAgendamento(agendamentos),
+    [agendamentos],
+  );
+
+  const dadosSemana = useMemo(
+    () => montarDadosSemana(agendamentos),
+    [agendamentos],
+  );
+
+  useEffect(() => {
+    if (!chartRef.current) {
+      return undefined;
+    }
+
+    if (chartInstanceRef.current) {
+      chartInstanceRef.current.destroy();
+    }
+
+    chartInstanceRef.current = new Chart(chartRef.current, {
+      type: 'bar',
+      data: {
+        labels: dadosSemana.map((dia) => dia.label),
+        datasets: [
+          {
+            label: 'Agendamentos',
+            data: dadosSemana.map((dia) => dia.total),
+            backgroundColor: 'rgba(0, 127, 111, 0.78)',
+            borderColor: '#006b5a',
+            borderRadius: 10,
+            borderSkipped: false,
+            maxBarThickness: 42,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            callbacks: {
+              label(context) {
+                const total = context.parsed.y;
+                return `${total} agendamento${total === 1 ? '' : 's'}`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false,
+            },
+            ticks: {
+              color: '#667085',
+              font: {
+                family: 'Poppins',
+                weight: 600,
+              },
+            },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0,
+              color: '#667085',
+              font: {
+                family: 'Poppins',
+              },
+            },
+            grid: {
+              color: 'rgba(223, 229, 236, 0.9)',
+            },
+          },
+        },
+      },
+    });
+
+    return () => {
+      chartInstanceRef.current?.destroy();
+      chartInstanceRef.current = null;
+    };
+  }, [dadosSemana]);
 
   function handleLogout() {
     logout();
     navigate('/login', { replace: true });
   }
+
+  const metricas = [
+    {
+      titulo: 'Total de agendamentos',
+      valor: carregando ? '...' : agendamentos.length,
+      detalhe: 'Histórico do negócio',
+      Icone: CalendarCheck,
+    },
+    {
+      titulo: 'Clientes únicos',
+      valor: carregando ? '...' : contarClientesUnicos(agendamentos),
+      detalhe: 'Por telefone, e-mail ou nome',
+      Icone: Users,
+      classeIcone: 'metric-blue',
+    },
+    {
+      titulo: 'Serviços ativos',
+      valor: carregando ? '...' : servicos.length,
+      detalhe: 'Disponíveis para agendar',
+      Icone: Scissors,
+      classeIcone: 'metric-yellow',
+    },
+    {
+      titulo: 'Profissionais ativos',
+      valor: carregando ? '...' : profissionais.length,
+      detalhe: 'Equipe de atendimento',
+      Icone: Store,
+    },
+  ];
 
   return (
     <DashboardShell
@@ -27,75 +321,27 @@ function Dashboard({ navigate }) {
         <div>
           <p className="eyebrow">Visão geral do seu negócio</p>
           <h1>Dashboard</h1>
+          <p className="panel-text">
+            Acompanhe indicadores reais do atendimento em um painel simples.
+          </p>
         </div>
       </header>
 
-      <section className="metrics-grid" aria-label="Atalhos principais">
-        <button
-          className="metric-card metric-action"
-          onClick={() => navigate('/negocio')}
-          type="button"
-        >
-          <span className="metric-icon" aria-hidden="true">
-            <Store size={22} strokeWidth={2} />
-          </span>
-          <div>
-            <p>Meu negócio</p>
-            <strong>Dados do negócio</strong>
-            <small>Horários, cidade e link público</small>
-          </div>
-        </button>
-        <button
-          className="metric-card metric-action"
-          onClick={() => navigate('/servicos')}
-          type="button"
-        >
-          <span className="metric-icon metric-yellow" aria-hidden="true">
-            <Scissors size={22} strokeWidth={2} />
-          </span>
-          <div>
-            <p>Serviços</p>
-            <strong>Catálogo</strong>
-            <small>Preços e duração dos atendimentos</small>
-          </div>
-        </button>
-        <button
-          className="metric-card metric-action"
-          onClick={() => navigate('/profissionais')}
-          type="button"
-        >
-          <span className="metric-icon metric-blue" aria-hidden="true">
-            <Users size={22} strokeWidth={2} />
-          </span>
-          <div>
-            <p>Profissionais</p>
-            <strong>Equipe</strong>
-            <small>Pessoas disponíveis para atender</small>
-          </div>
-        </button>
-        <button
-          className="metric-card metric-action"
-          onClick={() => navigate('/agenda')}
-          type="button"
-        >
-          <span className="metric-icon" aria-hidden="true">
-            <CalendarCheck size={22} strokeWidth={2} />
-          </span>
-          <div>
-            <p>Agenda</p>
-            <strong>Agendamentos</strong>
-            <small>Status e cancelamentos</small>
-          </div>
-        </button>
+      {erro && <p className="message message-error">{erro}</p>}
+
+      <section className="metrics-grid" aria-label="Indicadores do negócio">
+        {metricas.map((metrica) => (
+          <MetricCard key={metrica.titulo} {...metrica} />
+        ))}
       </section>
 
       <section className="dashboard-grid">
         <article className="dashboard-panel" aria-labelledby="next-title">
           <div className="panel-heading">
             <div>
-              <h2 id="next-title">Resumo da agenda</h2>
+              <h2 id="next-title">Próximo agendamento</h2>
               <p className="panel-text">
-                Acompanhe os horários reais pela tela de agenda.
+                Próximo horário pendente ou confirmado na agenda.
               </p>
             </div>
             <button
@@ -107,56 +353,60 @@ function Dashboard({ navigate }) {
             </button>
           </div>
 
-          <div className="dashboard-empty">
-            <span className="empty-icon" aria-hidden="true">
-              <CalendarCheck size={24} strokeWidth={2} />
-            </span>
+          {carregando && (
+            <p className="message message-info" aria-live="polite">
+              Carregando indicadores...
+            </p>
+          )}
+
+          {!carregando && proximoAgendamento && (
+            <div className="next-appointment-card">
+              <span className="empty-icon" aria-hidden="true">
+                <CalendarDays size={24} strokeWidth={2} />
+              </span>
+              <div>
+                <strong>{proximoAgendamento.cliente_nome}</strong>
+                <dl className="next-appointment-details">
+                  <div>
+                    <dt>Data</dt>
+                    <dd>{formatarData(proximoAgendamento.dataInicio)}</dd>
+                  </div>
+                  <div>
+                    <dt>Horário</dt>
+                    <dd>{formatarHorario(proximoAgendamento.dataInicio)}</dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+          )}
+
+          {!carregando && !proximoAgendamento && (
+            <div className="dashboard-empty">
+              <span className="empty-icon" aria-hidden="true">
+                <CalendarDays size={24} strokeWidth={2} />
+              </span>
+              <div>
+                <strong>Nenhum próximo agendamento</strong>
+                <p>
+                  Quando houver horários pendentes ou confirmados, o próximo
+                  atendimento aparecerá aqui.
+                </p>
+              </div>
+            </div>
+          )}
+        </article>
+
+        <article className="dashboard-panel" aria-labelledby="week-title">
+          <div className="panel-heading">
             <div>
-              <strong>Agenda pronta para uso</strong>
-              <p>
-                Use a área de agenda para visualizar clientes, serviços,
-                profissionais, horários e status dos agendamentos cadastrados.
+              <h2 id="week-title">Agendamentos da semana</h2>
+              <p className="panel-text">
+                Quantidade de agendamentos por dia na semana atual.
               </p>
             </div>
           </div>
-        </article>
-
-        <article className="dashboard-panel" aria-labelledby="status-title">
-          <h2 id="status-title">Atalhos rápidos</h2>
-          <p className="panel-text">
-            Continue a configuração do sistema sem perder tempo.
-          </p>
-          <div className="status-summary status-actions">
-            <button
-              className="status-action"
-              onClick={() => navigate('/servicos')}
-              type="button"
-            >
-              <span className="status-action-icon" aria-hidden="true">
-                <Scissors size={18} strokeWidth={2} />
-              </span>
-              Cadastrar serviços
-            </button>
-            <button
-              className="status-action"
-              onClick={() => navigate('/profissionais')}
-              type="button"
-            >
-              <span className="status-action-icon status-action-blue" aria-hidden="true">
-                <Users size={18} strokeWidth={2} />
-              </span>
-              Cadastrar profissionais
-            </button>
-            <button
-              className="status-action"
-              onClick={() => navigate('/agenda')}
-              type="button"
-            >
-              <span className="status-action-icon status-action-yellow" aria-hidden="true">
-                <CalendarDays size={18} strokeWidth={2} />
-              </span>
-              Ver agenda
-            </button>
+          <div className="dashboard-chart">
+            <canvas ref={chartRef} aria-label="Gráfico de agendamentos da semana" />
           </div>
         </article>
       </section>

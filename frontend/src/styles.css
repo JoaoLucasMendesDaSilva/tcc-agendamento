@@ -1751,6 +1751,59 @@ textarea:focus {
   color: var(--gray-500);
 }
 
+.next-appointment-card {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  margin-top: 22px;
+  border: 1px solid rgba(0, 127, 111, 0.14);
+  border-radius: 18px;
+  padding: 16px;
+  background:
+    radial-gradient(circle at 88% 10%, rgba(0, 127, 111, 0.08), transparent 28%),
+    var(--white);
+  box-shadow: var(--shadow-card);
+}
+
+.next-appointment-card strong {
+  display: block;
+  color: var(--gray-900);
+  font-size: 1.04rem;
+  font-weight: 700;
+}
+
+.next-appointment-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0 0;
+}
+
+.next-appointment-details dt {
+  color: var(--gray-500);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.next-appointment-details dd {
+  margin: 2px 0 0;
+  color: var(--green-800);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.dashboard-chart {
+  position: relative;
+  height: 280px;
+  margin-top: 18px;
+}
+
+.dashboard-chart canvas {
+  display: block;
+  max-width: 100%;
+}
+
 .empty-icon {
   display: grid;
   width: 52px;
