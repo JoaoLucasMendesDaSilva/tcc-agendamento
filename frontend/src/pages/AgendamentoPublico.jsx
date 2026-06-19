@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   CalendarX,
   CheckCircle2,
+  Clock,
+  MapPin,
+  Phone,
   Scissors,
   Users,
 } from 'lucide-react';
@@ -19,6 +22,16 @@ const CLIENTE_INICIAL = {
   email: '',
   observacoes: '',
 };
+
+const DIAS_SEMANA = [
+  'Domingo',
+  'Segunda',
+  'Terça',
+  'Quarta',
+  'Quinta',
+  'Sexta',
+  'Sábado',
+];
 
 const ETAPAS = ['Serviço', 'Profissional', 'Data e hora', 'Dados', 'Confirmação'];
 
@@ -75,6 +88,44 @@ function formatarTelefoneCabecalho(telefone) {
   return valor;
 }
 
+function normalizarHorario(horario) {
+  return String(horario || '').slice(0, 5);
+}
+
+function formatarDiasFuncionamento(dias) {
+  if (!Array.isArray(dias) || dias.length === 0) {
+    return 'Dias não informados';
+  }
+
+  return dias
+    .map((dia) => DIAS_SEMANA[Number(dia)])
+    .filter(Boolean)
+    .join(', ');
+}
+
+function negocioEstaAberto(negocio) {
+  const dias = Array.isArray(negocio?.dias_funcionamento)
+    ? negocio.dias_funcionamento.map(Number)
+    : [];
+  const abertura = normalizarHorario(negocio?.horario_abertura);
+  const fechamento = normalizarHorario(negocio?.horario_fechamento);
+
+  if (!dias.length || !abertura || !fechamento) {
+    return null;
+  }
+
+  const agora = new Date();
+  const horaAtual = `${String(agora.getHours()).padStart(2, '0')}:${String(
+    agora.getMinutes(),
+  ).padStart(2, '0')}`;
+
+  return (
+    dias.includes(agora.getDay()) &&
+    horaAtual >= abertura &&
+    horaAtual <= fechamento
+  );
+}
+
 function AgendamentoPublico({ slugOuId }) {
   const [negocio, setNegocio] = useState(null);
   const [servicos, setServicos] = useState([]);
@@ -113,6 +164,19 @@ function AgendamentoPublico({ slugOuId }) {
         : servicoId
           ? 2
           : 1;
+  const statusAberto = negocioEstaAberto(negocio);
+  const localizacao = [
+    negocio?.cidade && formatarCidade(negocio.cidade),
+    negocio?.endereco,
+  ]
+    .filter(Boolean)
+    .join(' • ');
+  const horarioFuncionamento =
+    negocio?.horario_abertura && negocio?.horario_fechamento
+      ? `${normalizarHorario(negocio.horario_abertura)} às ${normalizarHorario(
+          negocio.horario_fechamento,
+        )}`
+      : '';
 
   useEffect(() => {
     let ativo = true;
@@ -316,17 +380,56 @@ function AgendamentoPublico({ slugOuId }) {
     <main className="page public-booking-page">
       <section className="public-booking-card">
         <header className="public-booking-header">
-          <p className="eyebrow">Agendamento online</p>
-          <h1>{negocio?.nome}</h1>
-          <p>Agende seu horário de forma rápida e fácil.</p>
-          {(negocio?.cidade || negocio?.telefone) && (
+          <div className="public-business-hero">
+            <div className="business-avatar" aria-hidden="true">
+              {negocio?.nome?.charAt(0)?.toUpperCase() || 'A'}
+            </div>
+            <div>
+              <p className="eyebrow">Agendamento online</p>
+              <h1>{negocio?.nome}</h1>
+              <p>
+                {negocio?.descricao ||
+                  'Agende seu horário de forma rápida e fácil.'}
+              </p>
+            </div>
+            {statusAberto !== null && (
+              <span
+                className={`business-open-badge ${
+                  statusAberto ? 'is-open' : 'is-closed'
+                }`}
+              >
+                {statusAberto ? 'Aberto' : 'Fechado'}
+              </span>
+            )}
+          </div>
+
+          <div className="public-business-meta">
+            {localizacao && (
+              <span>
+                <MapPin aria-hidden="true" size={16} strokeWidth={2} />
+                {localizacao}
+              </span>
+            )}
+            {negocio?.telefone && (
+              <span>
+                <Phone aria-hidden="true" size={16} strokeWidth={2} />
+                {formatarTelefoneCabecalho(negocio.telefone)}
+              </span>
+            )}
+            {horarioFuncionamento && (
+              <span>
+                <Clock aria-hidden="true" size={16} strokeWidth={2} />
+                {horarioFuncionamento}
+              </span>
+            )}
+          </div>
+
+          <div className="business-hours-note">
+            <strong>Dias de funcionamento</strong>
             <span>
-              {formatarCidade(negocio?.cidade)}
-              {negocio?.telefone
-                ? ` • ${formatarTelefoneCabecalho(negocio.telefone)}`
-                : ''}
+              {formatarDiasFuncionamento(negocio?.dias_funcionamento)}
             </span>
-          )}
+          </div>
         </header>
 
         <div className="booking-steps" aria-label="Etapas do agendamento">
@@ -351,6 +454,22 @@ function AgendamentoPublico({ slugOuId }) {
 
         <div className="public-booking-content">
           {erro && <p className="message message-error">{erro}</p>}
+
+          <section className="booking-intro-card">
+            <span className="empty-icon" aria-hidden="true">
+              <CheckCircle2 size={24} strokeWidth={2} />
+            </span>
+            <div>
+              <strong>
+                Escolha um serviço, profissional e horário para agendar seu
+                atendimento.
+              </strong>
+              <p>
+                Selecione as opções disponíveis, preencha seus dados e confirme
+                o horário.
+              </p>
+            </div>
+          </section>
 
           {resumoConfirmado && (
             <section
