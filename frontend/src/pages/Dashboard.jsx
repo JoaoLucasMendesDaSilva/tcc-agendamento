@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Chart } from 'chart.js/auto';
+import { jsPDF } from 'jspdf';
 import {
   CalendarCheck,
   CalendarDays,
+  FileText,
   Scissors,
   Store,
   Users,
@@ -10,11 +12,23 @@ import {
 import DashboardShell from '../components/DashboardShell';
 import { useAuth } from '../contexts/AuthContext';
 import { listarAgendamentos } from '../services/agendamentosService';
+import { buscarNegocio } from '../services/negocioService';
 import { listarProfissionais } from '../services/profissionaisService';
 import { listarServicos } from '../services/servicosService';
 
 const DIAS_SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const STATUS_ATIVOS_AGENDA = ['pendente', 'confirmado'];
+
+function obterPeriodoMesAtual() {
+  const hoje = new Date();
+  const inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  const fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+
+  return {
+    inicio: inicio.toISOString().slice(0, 10),
+    fim: fim.toISOString().slice(0, 10),
+  };
+}
 
 function obterData(agendamento) {
   const data = new Date(agendamento.data_hora_inicio);
@@ -34,6 +48,14 @@ function formatarHorario(data) {
     hour: '2-digit',
     minute: '2-digit',
   }).format(data);
+}
+
+function formatarDataHora(data) {
+  if (!data) {
+    return 'Data não informada';
+  }
+
+  return `${formatarData(data)} ${formatarHorario(data)}`;
 }
 
 function criarChaveCliente(agendamento) {
@@ -56,6 +78,32 @@ function contarClientesUnicos(agendamentos) {
   });
 
   return clientes.size;
+}
+
+function filtrarAgendamentosPorPeriodo(agendamentos, inicio, fim) {
+  const dataInicio = new Date(`${inicio}T00:00:00`);
+  const dataFim = new Date(`${fim}T23:59:59`);
+
+  return agendamentos.filter((agendamento) => {
+    const data = obterData(agendamento);
+    return data && data >= dataInicio && data <= dataFim;
+  });
+}
+
+function encontrarMaisAgendado(agendamentos, campo) {
+  const contagem = new Map();
+
+  agendamentos.forEach((agendamento) => {
+    const valor = agendamento[campo];
+
+    if (valor) {
+      contagem.set(valor, (contagem.get(valor) || 0) + 1);
+    }
+  });
+
+  return Array.from(contagem.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([nome, total]) => ({ nome, total }))[0];
 }
 
 function encontrarProximoAgendamento(agendamentos) {
@@ -129,6 +177,9 @@ function Dashboard({ navigate }) {
   const [agendamentos, setAgendamentos] = useState([]);
   const [servicos, setServicos] = useState([]);
   const [profissionais, setProfissionais] = useState([]);
+  const [negocio, setNegocio] = useState(null);
+  const [periodoRelatorio, setPeriodoRelatorio] = useState(obterPeriodoMesAtual);
+  const [gerandoRelatorio, setGerandoRelatorio] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
 
@@ -139,11 +190,17 @@ function Dashboard({ navigate }) {
       setCarregando(true);
       setErro('');
 
-      const [resultadoAgendamentos, resultadoServicos, resultadoProfissionais] =
+      const [
+        resultadoAgendamentos,
+        resultadoServicos,
+        resultadoProfissionais,
+        resultadoNegocio,
+      ] =
         await Promise.allSettled([
           listarAgendamentos(),
           listarServicos(),
           listarProfissionais(),
+          buscarNegocio(),
         ]);
 
       if (!ativo) {
@@ -164,6 +221,11 @@ function Dashboard({ navigate }) {
         resultadoProfissionais.status === 'fulfilled'
           ? resultadoProfissionais.value.profissionais || []
           : [],
+      );
+      setNegocio(
+        resultadoNegocio.status === 'fulfilled'
+          ? resultadoNegocio.value.negocio || null
+          : null,
       );
 
       const primeiraFalha = [
@@ -281,6 +343,133 @@ function Dashboard({ navigate }) {
     navigate('/login', { replace: true });
   }
 
+  function atualizarPeriodo(campo, valor) {
+    setPeriodoRelatorio((atual) => ({
+      ...atual,
+      [campo]: valor,
+    }));
+  }
+
+  function gerarRelatorioPdf() {
+    setErro('');
+
+    if (!periodoRelatorio.inicio || !periodoRelatorio.fim) {
+      setErro('Informe o início e o fim do período do relatório.');
+      return;
+    }
+
+    if (periodoRelatorio.inicio > periodoRelatorio.fim) {
+      setErro('A data inicial não pode ser maior que a data final.');
+      return;
+    }
+
+    setGerandoRelatorio(true);
+
+    try {
+      const agendamentosPeriodo = filtrarAgendamentosPorPeriodo(
+        agendamentos,
+        periodoRelatorio.inicio,
+        periodoRelatorio.fim,
+      );
+      const servicoMaisAgendado = encontrarMaisAgendado(
+        agendamentosPeriodo,
+        'servico_nome',
+      );
+      const profissionalMaisAgendado = encontrarMaisAgendado(
+        agendamentosPeriodo,
+        'profissional_nome',
+      );
+      const doc = new jsPDF();
+      const margem = 14;
+      const larguraTexto = 182;
+      let y = 18;
+
+      function escrever(texto, tamanho = 10, estilo = 'normal') {
+        doc.setFont('helvetica', estilo);
+        doc.setFontSize(tamanho);
+        const linhas = doc.splitTextToSize(String(texto || ''), larguraTexto);
+        doc.text(linhas, margem, y);
+        y += linhas.length * (tamanho * 0.42) + 3;
+      }
+
+      function garantirEspaco(altura = 18) {
+        if (y + altura > 280) {
+          doc.addPage();
+          y = 18;
+        }
+      }
+
+      escrever('Relatório do Agendai', 18, 'bold');
+      escrever(`Negócio: ${negocio?.nome || 'Negócio não cadastrado'}`, 12, 'bold');
+      escrever(
+        `Período: ${formatarData(new Date(`${periodoRelatorio.inicio}T00:00:00`))} a ${formatarData(
+          new Date(`${periodoRelatorio.fim}T00:00:00`),
+        )}`,
+      );
+      y += 3;
+
+      escrever('Indicadores', 13, 'bold');
+      escrever(`Total de agendamentos: ${agendamentosPeriodo.length}`);
+      escrever(`Total de clientes únicos: ${contarClientesUnicos(agendamentosPeriodo)}`);
+      escrever(`Total de serviços ativos: ${servicos.length}`);
+      escrever(`Total de profissionais ativos: ${profissionais.length}`);
+      escrever(
+        `Serviço mais agendado: ${
+          servicoMaisAgendado
+            ? `${servicoMaisAgendado.nome} (${servicoMaisAgendado.total})`
+            : 'Sem dados no período'
+        }`,
+      );
+      escrever(
+        `Profissional mais agendado: ${
+          profissionalMaisAgendado
+            ? `${profissionalMaisAgendado.nome} (${profissionalMaisAgendado.total})`
+            : 'Sem dados no período'
+        }`,
+      );
+      y += 3;
+
+      escrever('Agendamentos do período', 13, 'bold');
+
+      if (agendamentosPeriodo.length === 0) {
+        escrever('Nenhum agendamento encontrado no período selecionado.');
+      } else {
+        agendamentosPeriodo
+          .map((agendamento) => ({
+            ...agendamento,
+            dataInicio: obterData(agendamento),
+          }))
+          .sort((a, b) => (a.dataInicio?.getTime() || 0) - (b.dataInicio?.getTime() || 0))
+          .slice(0, 60)
+          .forEach((agendamento) => {
+            garantirEspaco(22);
+            escrever(
+              `${formatarDataHora(agendamento.dataInicio)} - ${agendamento.cliente_nome || 'Cliente'} - ${
+                agendamento.servico_nome || 'Serviço'
+              } - ${agendamento.profissional_nome || 'Profissional'} - ${
+                agendamento.status || 'status não informado'
+              }`,
+              9,
+            );
+          });
+
+        if (agendamentosPeriodo.length > 60) {
+          escrever(
+            `Lista resumida: exibindo 60 de ${agendamentosPeriodo.length} agendamentos.`,
+            9,
+            'italic',
+          );
+        }
+      }
+
+      doc.save(`relatorio-agendai-${periodoRelatorio.inicio}-${periodoRelatorio.fim}.pdf`);
+    } catch {
+      setErro('Não foi possível gerar o relatório PDF.');
+    } finally {
+      setGerandoRelatorio(false);
+    }
+  }
+
   const metricas = [
     {
       titulo: 'Total de agendamentos',
@@ -333,6 +522,47 @@ function Dashboard({ navigate }) {
         {metricas.map((metrica) => (
           <MetricCard key={metrica.titulo} {...metrica} />
         ))}
+      </section>
+
+      <section className="dashboard-panel report-panel" aria-labelledby="report-title">
+        <div className="panel-heading">
+          <div>
+            <h2 id="report-title">Relatório PDF</h2>
+            <p className="panel-text">
+              Gere um resumo do negócio usando os dados reais do período.
+            </p>
+          </div>
+          <span className="summary-icon" aria-hidden="true">
+            <FileText size={24} strokeWidth={2} />
+          </span>
+        </div>
+
+        <div className="report-controls">
+          <label>
+            Início
+            <input
+              onChange={(event) => atualizarPeriodo('inicio', event.target.value)}
+              type="date"
+              value={periodoRelatorio.inicio}
+            />
+          </label>
+          <label>
+            Fim
+            <input
+              onChange={(event) => atualizarPeriodo('fim', event.target.value)}
+              type="date"
+              value={periodoRelatorio.fim}
+            />
+          </label>
+          <button
+            className="button button-primary"
+            disabled={carregando || gerandoRelatorio}
+            onClick={gerarRelatorioPdf}
+            type="button"
+          >
+            {gerandoRelatorio ? 'Gerando...' : 'Gerar relatório PDF'}
+          </button>
+        </div>
       </section>
 
       <section className="dashboard-grid">

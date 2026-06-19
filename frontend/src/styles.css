@@ -2029,6 +2029,20 @@ textarea:focus {
   max-width: 100%;
 }
 
+.report-panel {
+  width: 100%;
+}
+
+.report-controls {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.report-controls .button {
+  align-self: end;
+}
+
 .clients-grid {
   display: grid;
   gap: 18px;
@@ -3234,6 +3248,11 @@ textarea:focus {
   .appointment-heading {
     grid-template-columns: 1fr auto;
     align-items: start;
+  }
+
+  .report-controls {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    align-items: end;
   }
 
   .client-card-details {
