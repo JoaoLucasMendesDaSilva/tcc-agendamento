@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { label: 'Meu Negócio', path: '/negocio', Icon: Store },
   { label: 'Serviços', path: '/servicos', Icon: Scissors },
   { label: 'Profissionais', path: '/profissionais', Icon: Users },
+  { label: 'Clientes', path: '/clientes', Icon: Users },
   { label: 'Agenda', path: '/agenda', Icon: CalendarDays },
 ];
 

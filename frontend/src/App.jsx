@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import ProtectedRoute from './components/ProtectedRoute';
 import Agenda from './pages/Agenda';
 import Cadastro from './pages/Cadastro';
+import Clientes from './pages/Clientes';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import LandingPage from './pages/LandingPage';
@@ -94,6 +95,14 @@ function App() {
     return (
       <ProtectedRoute navigate={navigate}>
         <Agenda navigate={navigate} />
+      </ProtectedRoute>
+    );
+  }
+
+  if (path === '/clientes') {
+    return (
+      <ProtectedRoute navigate={navigate}>
+        <Clientes navigate={navigate} />
       </ProtectedRoute>
     );
   }
