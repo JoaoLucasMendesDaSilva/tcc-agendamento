@@ -5,6 +5,7 @@ import Agenda from './pages/Agenda';
 import Cadastro from './pages/Cadastro';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
+import LandingPage from './pages/LandingPage';
 import AgendamentoPublico from './pages/AgendamentoPublico';
 import Negocio from './pages/Negocio';
 import Profissionais from './pages/Profissionais';
@@ -43,6 +44,14 @@ function App() {
     const slugOuId = decodeURIComponent(path.replace('/agendar/', '').trim());
 
     return <AgendamentoPublico slugOuId={slugOuId} />;
+  }
+
+  if (path === '/') {
+    return <LandingPage navigate={navigate} />;
+  }
+
+  if (path === '/login') {
+    return <Login navigate={navigate} />;
   }
 
   if (path === '/cadastro') {
