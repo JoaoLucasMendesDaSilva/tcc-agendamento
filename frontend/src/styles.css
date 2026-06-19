@@ -1655,6 +1655,37 @@ textarea:focus {
   color: var(--red-600);
 }
 
+.qr-code-box {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.qr-code-frame {
+  display: grid;
+  width: fit-content;
+  place-items: center;
+  border: 1px solid rgba(0, 127, 111, 0.16);
+  border-radius: 14px;
+  padding: 12px;
+  background: var(--white);
+  box-shadow: var(--shadow-card);
+}
+
+.qr-code-frame canvas {
+  display: block;
+  width: 180px;
+  height: 180px;
+}
+
+.qr-code-download {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  justify-self: start;
+}
+
 @media (min-width: 720px) {
   .public-link-box {
     grid-template-columns: minmax(0, 1fr) auto;

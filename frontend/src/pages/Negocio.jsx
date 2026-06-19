@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Store } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Download, Store } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
 import DashboardShell from '../components/DashboardShell';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -75,6 +76,7 @@ function montarLinkPublico(slug) {
 
 function Negocio({ navigate }) {
   const { logout, usuario } = useAuth();
+  const qrCodeRef = useRef(null);
   const [negocio, setNegocio] = useState(null);
   const [form, setForm] = useState(FORM_INICIAL);
   const [carregando, setCarregando] = useState(true);
@@ -197,6 +199,23 @@ function Negocio({ navigate }) {
         'Não foi possível copiar. Selecione e copie o link manualmente.',
       );
     }
+  }
+
+  function baixarQrCode() {
+    if (!linkPublico || !qrCodeRef.current) {
+      return;
+    }
+
+    const canvas = qrCodeRef.current.querySelector('canvas');
+
+    if (!canvas) {
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = `qr-code-${negocio?.slug_publico || 'agendai'}.png`;
+    link.click();
   }
 
   return (
@@ -402,6 +421,37 @@ function Negocio({ navigate }) {
                       {feedbackLink}
                     </p>
                   )}
+                </dd>
+              </div>
+              <div>
+                <dt>QR Code</dt>
+                <dd>
+                  <div className="qr-code-box">
+                    <div
+                      aria-label="QR Code do link publico"
+                      className="qr-code-frame"
+                      ref={qrCodeRef}
+                    >
+                      <QRCodeCanvas
+                        value={linkPublico}
+                        size={180}
+                        level="M"
+                        includeMargin
+                      />
+                    </div>
+                    <p className="panel-text">
+                      Compartilhe este QR Code com seus clientes para que eles
+                      acessem sua p&aacute;gina de agendamento.
+                    </p>
+                    <button
+                      className="button button-secondary button-small qr-code-download"
+                      onClick={baixarQrCode}
+                      type="button"
+                    >
+                      <Download size={16} strokeWidth={2} />
+                      Baixar QR Code
+                    </button>
+                  </div>
                 </dd>
               </div>
               <div>
