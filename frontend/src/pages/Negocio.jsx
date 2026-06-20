@@ -77,23 +77,31 @@ function montarLinkPublico(slug) {
 }
 
 function BrandUploadField({ label, limite, onChange, preview, tipo }) {
+  const inputId = `identidade-visual-${tipo}`;
+
   return (
-    <label className="brand-upload-field">
+    <div className="brand-upload-field">
       <span>{label}</span>
       <small>PNG, JPG ou WEBP. Máximo de {limite} MB.</small>
-      <span className={`brand-preview brand-preview-${tipo}`}>
+      <input
+        accept="image/png,image/jpeg,image/webp"
+        className="brand-upload-input"
+        id={inputId}
+        onChange={(event) => onChange(tipo, event.target.files?.[0])}
+        type="file"
+      />
+      <label
+        aria-label={`Selecionar ${label.toLowerCase()}`}
+        className={`brand-preview brand-preview-${tipo}`}
+        htmlFor={inputId}
+      >
         {preview ? (
           <img src={preview} alt={`Preview ${label.toLowerCase()}`} />
         ) : (
           <ImageUp aria-hidden="true" size={28} strokeWidth={2} />
         )}
-      </span>
-      <input
-        accept="image/png,image/jpeg,image/webp"
-        onChange={(event) => onChange(tipo, event.target.files?.[0])}
-        type="file"
-      />
-    </label>
+      </label>
+    </div>
   );
 }
 

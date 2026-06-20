@@ -3027,9 +3027,19 @@ textarea:focus {
   object-fit: cover;
 }
 
-.brand-upload-field input[type="file"] {
-  width: 100%;
-  padding: 10px;
+.brand-upload-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.brand-upload-input:focus-visible + .brand-preview {
+  border-color: var(--green-700);
+  box-shadow: 0 0 0 4px rgba(0, 127, 111, 0.14);
 }
 
 .public-business-banner {
