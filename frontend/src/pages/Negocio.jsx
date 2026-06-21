@@ -273,15 +273,23 @@ function Negocio({ navigate }) {
 
     try {
       const payload = montarPayload(form);
-      const resposta = negocio
+      const editando = Boolean(negocio);
+      const resposta = editando
         ? await atualizarNegocio(negocio.id, payload)
         : await criarNegocio(payload);
 
       setNegocio(resposta.negocio);
       setForm(montarForm(resposta.negocio));
-      setSucesso(resposta.mensagem || 'Negócio salvo com sucesso.');
+      setSucesso(
+        editando
+          ? 'Dados do negócio atualizados com sucesso.'
+          : 'Negócio criado. Agora você pode cadastrar serviços e profissionais.',
+      );
     } catch (err) {
-      setErro(err.message);
+      setErro(
+        err.message ||
+          'Não foi possível salvar os dados do negócio. Tente novamente.',
+      );
     } finally {
       setSalvando(false);
     }

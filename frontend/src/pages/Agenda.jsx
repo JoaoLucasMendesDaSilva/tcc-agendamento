@@ -225,8 +225,8 @@ function Agenda({ navigate }) {
     setSalvandoId(agendamento.id);
 
     try {
-      const resposta = await atualizarStatusAgendamento(agendamento.id, status);
-      setSucesso(resposta.mensagem || 'Status atualizado com sucesso.');
+      await atualizarStatusAgendamento(agendamento.id, status);
+      setSucesso(`Status alterado para ${STATUS_LABELS[status] || status}.`);
       await carregarAgendamentos();
     } catch (err) {
       setErro(err.message);
@@ -249,8 +249,10 @@ function Agenda({ navigate }) {
     setSalvandoId(agendamento.id);
 
     try {
-      const resposta = await cancelarAgendamento(agendamento.id);
-      setSucesso(resposta.mensagem || 'Agendamento cancelado com sucesso.');
+      await cancelarAgendamento(agendamento.id);
+      setSucesso(
+        `Agendamento de ${agendamento.cliente_nome} cancelado com sucesso.`,
+      );
       await carregarAgendamentos();
     } catch (err) {
       setErro(err.message);
@@ -348,11 +350,25 @@ function Agenda({ navigate }) {
                 <CalendarX size={24} strokeWidth={2} />
               </span>
               <div>
-                <strong>Nenhum agendamento encontrado</strong>
+                <strong>
+                  {filtro === 'todos'
+                    ? 'Sua agenda ainda está vazia'
+                    : 'Nenhum agendamento neste filtro'}
+                </strong>
                 <p>
-                  Quando seus clientes agendarem pelo link público, eles
-                  aparecerão aqui.
+                  {filtro === 'todos'
+                    ? 'Quando um cliente usar seu link público, o atendimento aparecerá aqui.'
+                    : 'Tente outro filtro para consultar os demais atendimentos.'}
                 </p>
+                {filtro !== 'todos' && (
+                  <button
+                    className="button button-secondary button-small"
+                    onClick={() => setFiltro('todos')}
+                    type="button"
+                  >
+                    Ver todos
+                  </button>
+                )}
               </div>
             </div>
           )}

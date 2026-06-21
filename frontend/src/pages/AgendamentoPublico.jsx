@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   CalendarX,
   CheckCircle2,
+  CircleAlert,
   Clock,
   MapPin,
   Phone,
@@ -369,16 +370,39 @@ function AgendamentoPublico({ slugOuId }) {
   }
 
   if (erro && !negocio) {
+    const negocioNaoEncontrado = erro
+      .toLocaleLowerCase('pt-BR')
+      .includes('não encontrado');
+
     return (
       <main className="page public-booking-page">
         <section className="public-booking-card">
           <div className="public-booking-header">
             <p className="eyebrow">Agendamento online</p>
-            <h1>Não foi possível carregar</h1>
-            <p>Verifique o link de agendamento e tente novamente.</p>
+            <h1>
+              {negocioNaoEncontrado
+                ? 'Negócio não encontrado'
+                : 'Não foi possível abrir esta página'}
+            </h1>
+            <p>
+              {negocioNaoEncontrado
+                ? 'Este link pode estar incorreto ou o negócio não está disponível.'
+                : 'Verifique sua conexão e tente novamente em alguns instantes.'}
+            </p>
           </div>
           <div className="public-booking-content">
-            <p className="message message-error">{erro}</p>
+            <div className="dashboard-empty">
+              <span className="empty-icon" aria-hidden="true">
+                <CircleAlert size={24} strokeWidth={2} />
+              </span>
+              <div>
+                <strong>Confira o endereço recebido</strong>
+                <p>Se o problema continuar, solicite um novo link ao negócio.</p>
+                <a className="button button-secondary button-small" href="/">
+                  Voltar ao início
+                </a>
+              </div>
+            </div>
           </div>
         </section>
       </main>

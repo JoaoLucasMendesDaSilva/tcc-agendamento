@@ -115,16 +115,26 @@ function Servicos({ navigate }) {
 
     try {
       const payload = montarPayload(form);
-      const resposta = servicoEditando
-        ? await atualizarServico(servicoEditando.id, payload)
-        : await criarServico(payload);
+      const editando = Boolean(servicoEditando);
 
-      setSucesso(resposta.mensagem || 'Serviço salvo com sucesso.');
+      if (editando) {
+        await atualizarServico(servicoEditando.id, payload);
+      } else {
+        await criarServico(payload);
+      }
+
+      setSucesso(
+        editando
+          ? 'Serviço atualizado. As alterações já estão disponíveis.'
+          : 'Serviço criado. Ele já aparece no agendamento público.',
+      );
       setServicoEditando(null);
       setForm(FORM_INICIAL);
       await carregarServicos();
     } catch (err) {
-      setErro(err.message);
+      setErro(
+        err.message || 'Não foi possível salvar o serviço. Tente novamente.',
+      );
     } finally {
       setSalvando(false);
     }
@@ -143,8 +153,10 @@ function Servicos({ navigate }) {
     setSucesso('');
 
     try {
-      const resposta = await desativarServico(servico.id);
-      setSucesso(resposta.mensagem || 'Serviço desativado com sucesso.');
+      await desativarServico(servico.id);
+      setSucesso(
+        'Serviço desativado. Ele não aparecerá em novos agendamentos.',
+      );
 
       if (servicoEditando?.id === servico.id) {
         cancelarEdicao();
@@ -315,7 +327,10 @@ function Servicos({ navigate }) {
               </span>
               <div>
                 <strong>Nenhum serviço cadastrado</strong>
-                <p>Adicione o primeiro serviço para começar a receber horários.</p>
+                <p>
+                  Cadastre nome, duração e preço para disponibilizá-lo aos
+                  clientes.
+                </p>
               </div>
             </div>
           )}

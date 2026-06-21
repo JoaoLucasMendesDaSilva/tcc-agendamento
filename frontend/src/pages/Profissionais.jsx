@@ -108,16 +108,27 @@ function Profissionais({ navigate }) {
 
     try {
       const payload = montarPayload(form);
-      const resposta = profissionalEditando
-        ? await atualizarProfissional(profissionalEditando.id, payload)
-        : await criarProfissional(payload);
+      const editando = Boolean(profissionalEditando);
 
-      setSucesso(resposta.mensagem || 'Profissional salvo com sucesso.');
+      if (editando) {
+        await atualizarProfissional(profissionalEditando.id, payload);
+      } else {
+        await criarProfissional(payload);
+      }
+
+      setSucesso(
+        editando
+          ? 'Profissional atualizado. Os novos dados já estão disponíveis.'
+          : 'Profissional criado. Ele já pode receber agendamentos.',
+      );
       setProfissionalEditando(null);
       setForm(FORM_INICIAL);
       await carregarProfissionais();
     } catch (err) {
-      setErro(err.message);
+      setErro(
+        err.message ||
+          'Não foi possível salvar o profissional. Tente novamente.',
+      );
     } finally {
       setSalvando(false);
     }
@@ -136,8 +147,10 @@ function Profissionais({ navigate }) {
     setSucesso('');
 
     try {
-      const resposta = await desativarProfissional(profissional.id);
-      setSucesso(resposta.mensagem || 'Profissional desativado com sucesso.');
+      await desativarProfissional(profissional.id);
+      setSucesso(
+        'Profissional desativado. Ele não aparecerá em novos agendamentos.',
+      );
 
       if (profissionalEditando?.id === profissional.id) {
         cancelarEdicao();
@@ -307,7 +320,10 @@ function Profissionais({ navigate }) {
                 </span>
                 <div>
                   <strong>Nenhum profissional cadastrado</strong>
-                  <p>Adicione a equipe que atenderá os clientes.</p>
+                  <p>
+                    Cadastre quem realizará os serviços para liberar os
+                    horários aos clientes.
+                  </p>
                 </div>
               </div>
             )}

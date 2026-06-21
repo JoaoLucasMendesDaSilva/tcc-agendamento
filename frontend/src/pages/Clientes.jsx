@@ -376,11 +376,25 @@ function Clientes({ navigate }) {
                 <Users size={24} strokeWidth={2} />
               </span>
               <div>
-                <strong>Nenhum cliente encontrado</strong>
+                <strong>
+                  {busca
+                    ? 'Nenhum cliente corresponde à busca'
+                    : 'Sua lista de clientes ainda está vazia'}
+                </strong>
                 <p>
-                  Clientes aparecem aqui depois que existem agendamentos no
-                  negócio.
+                  {busca
+                    ? 'Revise o nome, telefone ou e-mail informado.'
+                    : 'Os clientes aparecerão aqui após o primeiro agendamento.'}
                 </p>
+                {busca && (
+                  <button
+                    className="button button-secondary button-small"
+                    onClick={() => setBusca('')}
+                    type="button"
+                  >
+                    Limpar busca
+                  </button>
+                )}
               </div>
             </div>
           )}

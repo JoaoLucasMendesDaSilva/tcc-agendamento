@@ -10,6 +10,7 @@ import LandingPage from './pages/LandingPage';
 import AgendamentoPublico from './pages/AgendamentoPublico';
 import GerenciarAgendamento from './pages/GerenciarAgendamento';
 import Negocio from './pages/Negocio';
+import NotFound from './pages/NotFound';
 import Profissionais from './pages/Profissionais';
 import Servicos from './pages/Servicos';
 
@@ -116,7 +117,7 @@ function App() {
     );
   }
 
-  return <Login navigate={navigate} />;
+  return <NotFound navigate={navigate} />;
 }
 
 export default App;

@@ -140,6 +140,48 @@ textarea {
   animation: fadeIn 320ms ease both;
 }
 
+.system-state-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+  background: var(--page-bg);
+}
+
+.system-state-card {
+  display: grid;
+  width: min(100%, 540px);
+  justify-items: center;
+  gap: 14px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius);
+  padding: clamp(28px, 7vw, 52px);
+  background: var(--panel-bg);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+  animation: slideUp 320ms ease both;
+}
+
+.system-state-card h1,
+.system-state-card p {
+  margin: 0;
+}
+
+.system-state-card > p:not(.eyebrow) {
+  max-width: 440px;
+  color: var(--gray-500);
+}
+
+.system-state-icon {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border-radius: 16px;
+  color: var(--green-800);
+  background: var(--green-100);
+}
+
 .page-center {
   display: grid;
   place-items: center;

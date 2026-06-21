@@ -199,7 +199,7 @@ function GerenciarAgendamento({ token }) {
         <header className="public-booking-header">
           <p className="eyebrow">Agendai</p>
           <h1>Gerenciar agendamento</h1>
-          <p>Consulte os dados e cancele seu horário quando necessário.</p>
+          <p>Consulte, confirme, reagende ou cancele seu horário.</p>
         </header>
 
         <div className="public-booking-content">
@@ -209,7 +209,9 @@ function GerenciarAgendamento({ token }) {
             </p>
           )}
 
-          {erro && <p className="message message-error">{erro}</p>}
+          {erro && agendamento && (
+            <p className="message message-error">{erro}</p>
+          )}
           {sucesso && <p className="message message-success">{sucesso}</p>}
 
           {!carregando && !agendamento && (
@@ -218,8 +220,14 @@ function GerenciarAgendamento({ token }) {
                 <CalendarX size={24} strokeWidth={2} />
               </span>
               <div>
-                <strong>Agendamento não encontrado</strong>
-                <p>Confira se o link está completo e tente novamente.</p>
+                <strong>Link de gerenciamento inválido</strong>
+                <p>
+                  O endereço pode estar incompleto ou não corresponder a um
+                  agendamento. Solicite um novo link ao negócio.
+                </p>
+                <a className="button button-secondary button-small" href="/">
+                  Voltar ao início
+                </a>
               </div>
             </div>
           )}
