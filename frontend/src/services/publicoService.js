@@ -52,8 +52,23 @@ function criarAgendamentoPublico(slugOuId, dados) {
   );
 }
 
+function buscarAgendamentoPublico(token) {
+  return request(`/api/publico/agendamentos/${encodeURIComponent(token)}`, {
+    auth: false,
+  });
+}
+
+function cancelarAgendamentoPublico(token) {
+  return request(`/api/publico/agendamentos/${encodeURIComponent(token)}`, {
+    auth: false,
+    method: 'DELETE',
+  });
+}
+
 export {
+  buscarAgendamentoPublico,
   buscarNegocioPublico,
+  cancelarAgendamentoPublico,
   criarAgendamentoPublico,
   listarHorariosDisponiveis,
   listarProfissionaisPublicos,

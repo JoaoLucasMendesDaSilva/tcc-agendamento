@@ -1,10 +1,37 @@
 const {
+  buscarAgendamentoPublicoPorToken,
+  cancelarAgendamentoPublicoPorToken,
   criarAgendamentoPublico,
   listarHorariosDisponiveis,
   listarProfissionaisPublicos,
   listarServicosPublicos,
   obterNegocio,
 } = require('../services/publicoService');
+
+async function buscarAgendamento(req, res, next) {
+  try {
+    const agendamento = await buscarAgendamentoPublicoPorToken(req.params.token);
+
+    res.json({ agendamento });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function cancelarAgendamento(req, res, next) {
+  try {
+    const agendamento = await cancelarAgendamentoPublicoPorToken(
+      req.params.token
+    );
+
+    res.json({
+      mensagem: 'Agendamento cancelado com sucesso.',
+      agendamento,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
 
 async function buscarNegocio(req, res, next) {
   try {
@@ -72,7 +99,9 @@ async function criarAgendamento(req, res, next) {
 }
 
 module.exports = {
+  buscarAgendamento,
   buscarNegocio,
+  cancelarAgendamento,
   criarAgendamento,
   listarHorarios,
   listarProfissionais,

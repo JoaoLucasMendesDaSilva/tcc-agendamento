@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const { getDatabasePool } = require('../config/database');
 
 const CAMPOS_AGENDAMENTO_PROIBIDOS = [
@@ -29,6 +30,20 @@ function criarErro(status, mensagem, code) {
   }
 
   return error;
+}
+
+function gerarTokenPublico() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+function obterHashTokenPublico(token) {
+  const valor = String(token || '').trim().toLowerCase();
+
+  if (!/^[a-f0-9]{64}$/.test(valor)) {
+    throw criarErro(404, 'Agendamento não encontrado.');
+  }
+
+  return crypto.createHash('sha256').update(valor).digest('hex');
 }
 
 function validarIdPositivo(valor, mensagem) {
@@ -313,6 +328,70 @@ function formatarAgendamentoPublico(agendamento) {
   };
 }
 
+function formatarAgendamentoGerenciavel(agendamento) {
+  return {
+    negocio_nome: agendamento.negocio_nome,
+    servico_nome: agendamento.servico_nome,
+    profissional_nome: agendamento.profissional_nome,
+    cliente_nome: agendamento.cliente_nome,
+    data_hora_inicio: formatarDataHora(
+      converterParaDataLocal(agendamento.data_hora_inicio)
+    ),
+    data_hora_fim: formatarDataHora(
+      converterParaDataLocal(agendamento.data_hora_fim)
+    ),
+    status: agendamento.status,
+    observacoes: agendamento.observacoes,
+  };
+}
+
+async function buscarAgendamentoGerenciavelPorHash(tokenHash) {
+  const pool = getDatabasePool();
+  const [agendamentos] = await pool.execute(
+    `SELECT n.nome AS negocio_nome, s.nome AS servico_nome,
+      p.nome AS profissional_nome, a.cliente_nome, a.data_hora_inicio,
+      a.data_hora_fim, a.status, a.observacoes
+     FROM agendamentos a
+     INNER JOIN negocios n ON n.id = a.negocio_id
+     INNER JOIN servicos s ON s.id = a.servico_id
+     INNER JOIN profissionais p ON p.id = a.profissional_id
+     WHERE a.token_publico_hash = ?
+     LIMIT 1`,
+    [tokenHash]
+  );
+
+  if (agendamentos.length === 0) {
+    throw criarErro(404, 'Agendamento não encontrado.');
+  }
+
+  return formatarAgendamentoGerenciavel(agendamentos[0]);
+}
+
+async function buscarAgendamentoPublicoPorToken(token) {
+  return buscarAgendamentoGerenciavelPorHash(obterHashTokenPublico(token));
+}
+
+async function cancelarAgendamentoPublicoPorToken(token) {
+  const tokenHash = obterHashTokenPublico(token);
+  const pool = getDatabasePool();
+  const [resultado] = await pool.execute(
+    `UPDATE agendamentos
+     SET status = 'cancelado'
+     WHERE token_publico_hash = ? AND status <> 'cancelado'`,
+    [tokenHash]
+  );
+
+  if (resultado.affectedRows === 0) {
+    const agendamento = await buscarAgendamentoGerenciavelPorHash(tokenHash);
+
+    if (agendamento.status === 'cancelado') {
+      throw criarErro(409, 'Este agendamento já está cancelado.');
+    }
+  }
+
+  return buscarAgendamentoGerenciavelPorHash(tokenHash);
+}
+
 async function buscarNegocioPublico(slugOuId) {
   const pool = getDatabasePool();
   const valor = String(slugOuId || '').trim();
@@ -571,6 +650,8 @@ function validarDentroDoHorario(negocio, inicio, fim) {
 async function criarAgendamentoPublico(slugOuId, dados) {
   const dadosValidados = montarDadosAgendamento(dados);
   const negocio = await buscarNegocioPublico(slugOuId);
+  const tokenPublico = gerarTokenPublico();
+  const tokenPublicoHash = obterHashTokenPublico(tokenPublico);
   const pool = getDatabasePool();
   const connection = await pool.getConnection();
 
@@ -623,8 +704,9 @@ async function criarAgendamentoPublico(slugOuId, dados) {
     const [resultado] = await connection.execute(
       `INSERT INTO agendamentos (
         negocio_id, servico_id, profissional_id, cliente_nome, cliente_telefone,
-        cliente_email, data_hora_inicio, data_hora_fim, status, observacoes
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'confirmado', ?)`,
+        cliente_email, data_hora_inicio, data_hora_fim, status, observacoes,
+        token_publico_hash
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'confirmado', ?, ?)`,
       [
         negocio.id,
         servico.id,
@@ -635,6 +717,7 @@ async function criarAgendamentoPublico(slugOuId, dados) {
         formatarDataHora(dadosValidados.dataHoraInicio).replace('T', ' '),
         formatarDataHora(dataHoraFim).replace('T', ' '),
         dadosValidados.observacoes,
+        tokenPublicoHash,
       ]
     );
 
@@ -649,7 +732,10 @@ async function criarAgendamentoPublico(slugOuId, dados) {
 
     await connection.commit();
 
-    return formatarAgendamentoPublico(agendamentos[0]);
+    return {
+      ...formatarAgendamentoPublico(agendamentos[0]),
+      token_gerenciamento: tokenPublico,
+    };
   } catch (err) {
     await connection.rollback();
     throw err;
@@ -659,6 +745,8 @@ async function criarAgendamentoPublico(slugOuId, dados) {
 }
 
 module.exports = {
+  buscarAgendamentoPublicoPorToken,
+  cancelarAgendamentoPublicoPorToken,
   criarAgendamentoPublico,
   listarHorariosDisponiveis,
   listarProfissionaisPublicos,

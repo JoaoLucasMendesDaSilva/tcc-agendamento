@@ -323,12 +323,18 @@ function AgendamentoPublico({ slugOuId }) {
         observacoes: cliente.observacoes || undefined,
         data_hora_inicio: horarioSelecionado.data_hora_inicio,
       });
+      const tokenGerenciamento = resposta.agendamento?.token_gerenciamento;
+      const linkGerenciamento = tokenGerenciamento
+        ? `${window.location.origin}/gerenciar-agendamento/${encodeURIComponent(
+            tokenGerenciamento
+          )}`
+        : '';
 
       setSucesso(
         resposta.mensagem ||
           'Agendamento confirmado. Anote o dia e horário escolhidos.'
       );
-      setResumoConfirmado(resumo);
+      setResumoConfirmado({ ...resumo, linkGerenciamento });
       setCliente(CLIENTE_INICIAL);
       setHorarioSelecionado(null);
       const horariosResposta = await listarHorariosDisponiveis(slugOuId, {
@@ -530,6 +536,20 @@ function AgendamentoPublico({ slugOuId }) {
                   </dd>
                 </div>
               </dl>
+
+              {resumoConfirmado.linkGerenciamento && (
+                <div className="public-link-box">
+                  <span className="public-link-text">
+                    {resumoConfirmado.linkGerenciamento}
+                  </span>
+                  <a
+                    className="button button-primary button-small"
+                    href={resumoConfirmado.linkGerenciamento}
+                  >
+                    Gerenciar agendamento
+                  </a>
+                </div>
+              )}
             </section>
           )}
 

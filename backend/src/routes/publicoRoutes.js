@@ -3,6 +3,8 @@ const publicoController = require('../controllers/publicoController');
 
 const router = express.Router();
 
+router.get('/agendamentos/:token', publicoController.buscarAgendamento);
+router.delete('/agendamentos/:token', publicoController.cancelarAgendamento);
 router.get('/negocio/:slugOuId', publicoController.buscarNegocio);
 router.get('/negocio/:slugOuId/servicos', publicoController.listarServicos);
 router.get(

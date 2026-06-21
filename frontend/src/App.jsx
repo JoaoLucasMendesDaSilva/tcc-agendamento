@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import LandingPage from './pages/LandingPage';
 import AgendamentoPublico from './pages/AgendamentoPublico';
+import GerenciarAgendamento from './pages/GerenciarAgendamento';
 import Negocio from './pages/Negocio';
 import Profissionais from './pages/Profissionais';
 import Servicos from './pages/Servicos';
@@ -45,6 +46,14 @@ function App() {
     const slugOuId = decodeURIComponent(path.replace('/agendar/', '').trim());
 
     return <AgendamentoPublico slugOuId={slugOuId} />;
+  }
+
+  if (path.startsWith('/gerenciar-agendamento/')) {
+    const token = decodeURIComponent(
+      path.replace('/gerenciar-agendamento/', '').trim()
+    );
+
+    return <GerenciarAgendamento token={token} />;
   }
 
   if (path === '/') {
