@@ -7,6 +7,15 @@ const path = require('path');
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
+const TIMEZONE_APLICACAO = 'America/Sao_Paulo';
+const timezoneConfigurado = process.env.TZ || TIMEZONE_APLICACAO;
+
+if (timezoneConfigurado !== TIMEZONE_APLICACAO) {
+  throw new Error(`TZ deve ser configurado como ${TIMEZONE_APLICACAO}.`);
+}
+
+process.env.TZ = timezoneConfigurado;
+
 const { testDatabaseConnection } = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
 const negocioRoutes = require('./routes/negocioRoutes');
@@ -18,6 +27,23 @@ const agendamentosRoutes = require('./routes/agendamentosRoutes');
 const { UPLOAD_ROOT } = require('./utils/imageStorage');
 
 const app = express();
+
+const trustProxyHops = Number(
+  process.env.TRUST_PROXY_HOPS ||
+    (process.env.NODE_ENV === 'production' ? 1 : 0)
+);
+
+if (
+  !Number.isInteger(trustProxyHops) ||
+  trustProxyHops < 0 ||
+  trustProxyHops > 10
+) {
+  throw new Error('TRUST_PROXY_HOPS deve ser um inteiro entre 0 e 10.');
+}
+
+if (trustProxyHops > 0) {
+  app.set('trust proxy', trustProxyHops);
+}
 
 const allowedOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173')
   .split(',')

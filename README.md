@@ -1,184 +1,444 @@
 # Agendai
 
-Agendai é um sistema de agendamento online para pequenos negócios. O MVP permite que um empreendedor cadastre seu negócio, serviços e profissionais, divulgue um link público de agendamento e acompanhe os horários recebidos em uma agenda privada.
+Agendai é um sistema de agendamento online para pequenos negócios, desenvolvido como Trabalho de Conclusão de Curso (TCC). A aplicação ajuda barbearias, salões, clínicas, estúdios e profissionais autônomos a organizar serviços, profissionais, clientes e horários em um único lugar.
 
-O objetivo do projeto é centralizar o fluxo básico de atendimento: o cliente acessa um link público, escolhe serviço, profissional, data e horário, informa seus dados e confirma o agendamento sem precisar criar conta.
+O empreendedor administra o negócio por um painel privado. O cliente acessa um link público, escolhe serviço, profissional, data e horário e confirma o atendimento sem criar uma conta.
 
-## Status
+## Status do projeto
 
-MVP funcional e deployado:
+O Agendai está em estado de **MVP funcional e deployado**:
 
-- Frontend publicado na Vercel.
-- Backend publicado na Railway.
-- Banco MySQL hospedado na Railway.
+- frontend React hospedado na Vercel;
+- backend Express hospedado na Railway;
+- banco MySQL hospedado na Railway;
+- fluxo administrativo e agendamento público integrados;
+- interface responsiva, PWA instalável e suporte a tema escuro.
 
-URLs reais, senhas, tokens e dados privados não devem ser versionados no repositório. Use placeholders em documentação e arquivos de exemplo.
+URLs privadas, senhas, tokens e credenciais reais não devem ser incluídos no repositório.
 
-## Funcionalidades
+## Funcionalidades implementadas
 
-- Cadastro e login do empreendedor.
-- Dashboard privado.
-- Cadastro e edição do negócio.
-- CRUD de serviços com desativação lógica.
-- CRUD de profissionais com desativação lógica.
-- Agenda privada do empreendedor.
-- Link público `/agendar/:slugOuId`.
-- Cliente escolhe serviço, profissional, data e horário.
-- Cliente confirma agendamento informando nome, telefone e e-mail opcional.
-- Prevenção de conflito de horário.
-- Cancelamento e alteração de status de agendamentos no painel privado.
+### Autenticação
 
-## Visual atual
+- Cadastro de empreendedor.
+- Login com e-mail e senha.
+- Sessão protegida por JWT.
+- Validação da sessão com **GET /api/auth/me**.
+- Logout e proteção das páginas administrativas.
 
-- Redesign visual aplicado ao frontend.
-- Layout responsivo e mobile-first.
+### Dashboard inteligente
+
+- Total de agendamentos.
+- Total de clientes únicos.
+- Total de serviços ativos.
+- Total de profissionais ativos.
+- Próximo agendamento.
+- Gráfico de agendamentos da semana.
+- Seleção de período e geração de relatório PDF com dados reais.
+
+### Meu Negócio
+
+- Cadastro e edição dos dados do negócio.
+- Nome, descrição, telefone, endereço e cidade.
+- Horários e dias de funcionamento.
+- Slug e link público de agendamento.
+- Cópia do link público.
+- QR Code com opção de download.
+- Compartilhamento do link pelo WhatsApp.
+- Upload e substituição de logo.
+- Upload e substituição de banner/capa.
+- Preview das imagens antes de salvar.
+
+### Serviços
+
+- Cadastro, listagem e edição.
+- Duração e preço.
+- Desativação lógica com **ativo = false**.
+- Apenas serviços ativos aparecem no fluxo público.
+
+### Profissionais
+
+- Cadastro, listagem e edição.
+- Especialidade, telefone e e-mail.
+- Desativação lógica com **ativo = false**.
+- Apenas profissionais ativos aparecem no fluxo público.
+
+### Clientes
+
+- Lista construída a partir dos agendamentos existentes.
+- Identificação prioritária por telefone, seguida por e-mail e nome.
+- Busca por nome, telefone ou e-mail.
+- Total de clientes, clientes recorrentes e novos clientes.
+- Histórico resumido de agendamentos por cliente.
+
+### Agenda privada
+
+- Agendamentos agrupados por data.
+- Filtros por todos, hoje e status.
+- Dados de cliente, serviço, profissional, horário e observações.
+- Alteração de status.
+- Cancelamento lógico por mudança de status.
+- Isolamento dos dados pelo negócio autenticado.
+
+### Página pública personalizada
+
+Rota:
+
+~~~txt
+/agendar/:slugOuId
+~~~
+
+A página utiliza nome, descrição, logo, banner, telefone, cidade, endereço, horários e dias de funcionamento do negócio. Também apresenta um indicador visual de aberto ou fechado.
+
+Fluxo do cliente:
+
+1. Escolher serviço.
+2. Escolher profissional.
+3. Escolher data.
+4. Escolher horário disponível.
+5. Informar nome, telefone, e-mail opcional e observações opcionais.
+6. Confirmar o agendamento.
+
+O backend calcula o término pelo tempo do serviço, respeita o funcionamento do negócio e bloqueia sobreposição com agendamentos pendentes ou confirmados.
+
+### Landing Page
+
+- Apresentação pública do Agendai.
+- Benefícios, etapas de funcionamento e planos demonstrativos.
+- Chamadas para cadastro e login.
+- Layout responsivo alinhado à identidade visual do sistema.
+
+### Experiência visual
+
+- Layout mobile-first.
 - Sidebar animada e recolhível.
-- Ícones reais com `lucide-react`.
-- Microinterações em botões, cards, inputs e estados selecionados.
-- Ilustração no painel de autenticação.
-- Fluxo público de agendamento redesenhado em formato de etapas.
+- Cards, badges, inputs e botões padronizados.
+- Ícones com lucide-react.
+- Microinterações em CSS.
+- Dark Mode persistido no navegador.
+- Ilustração no painel de Login e Cadastro.
+- Empty states e mensagens de carregamento, erro e sucesso.
 
-## Tecnologias
+### PWA instalável
 
-Frontend:
+- Manifesto web.
+- Service worker para assets estáticos.
+- Ícones de 192 px e 512 px.
+- Instalação em Android, iPhone e Desktop.
+- Botão de instalação quando o navegador oferece beforeinstallprompt.
+- Execução em modo standalone.
 
-- React
-- Vite
-- CSS puro
-- lucide-react
-- Vercel
+O PWA não armazena respostas da API. Sem conexão, dados dinâmicos e agendamentos não ficam disponíveis.
 
-Backend:
+## Arquitetura
 
-- Node.js
-- Express
-- MySQL
-- mysql2/promise
-- JWT
-- bcrypt
-- Helmet
-- CORS
-- express-rate-limit
-- Railway
+~~~txt
+Cliente
+  |
+  v
+Frontend React/Vite (Vercel)
+  |
+  | HTTPS / JSON / JWT
+  v
+Backend Node.js/Express (Railway)
+  |
+  v
+MySQL (Railway)
+~~~
 
-## Estrutura básica
+### Frontend
 
-```txt
+- React 19.
+- Vite.
+- CSS puro.
+- Chart.js.
+- jsPDF.
+- lucide-react.
+- qrcode.react.
+- Deploy na Vercel.
+
+### Backend
+
+- Node.js.
+- Express.
+- mysql2/promise.
+- JWT e bcrypt.
+- Helmet.
+- CORS.
+- express-rate-limit.
+- Multer para uploads.
+- Deploy na Railway.
+
+### Banco
+
+- MySQL com InnoDB.
+- Charset utf8mb4.
+- Chaves estrangeiras, índices e constraints.
+- Hospedagem no Railway.
+
+## Estrutura do projeto
+
+~~~txt
 tcc-agendamento/
   backend/
+    database/
+      migrations/
+        001_create_schema.sql
+        002_add_business_branding.sql
+    src/
+      config/
+      controllers/
+      middlewares/
+      routes/
+      services/
+      utils/
   frontend/
+    public/
+      icons/
+      manifest.webmanifest
+      sw.js
     src/
       assets/
       components/
+      contexts/
       pages/
       services/
-```
+    vercel.json
+  .env.example
+  README.md
+~~~
 
-Pastas principais:
+## Requisitos
 
-- `backend/`: API Express, rotas, controllers, services, conexão MySQL e script SQL.
-- `frontend/`: aplicação React/Vite.
-- `frontend/src/components`: componentes reutilizáveis.
-- `frontend/src/pages`: telas do sistema.
-- `frontend/src/services`: consumo da API.
-- `frontend/src/assets`: imagens e arquivos estáticos do frontend.
+- Node.js 18 ou superior.
+- npm.
+- MySQL 8 ou compatível.
+- MySQL Workbench opcional.
 
 ## Variáveis de ambiente
 
 ### Backend
 
-Configure as variáveis do backend no ambiente local ou no painel da Railway:
+O backend lê o arquivo **.env** na raiz do projeto. Use **.env.example** como referência:
 
-```env
+~~~env
 PORT=3001
-NODE_ENV=production
-CORS_ORIGIN=https://seu-frontend.vercel.app
-JWT_SECRET=use_um_segredo_forte
+NODE_ENV=development
+TZ=America/Sao_Paulo
+TRUST_PROXY_HOPS=0
+CORS_ORIGIN=http://localhost:5173
+JWT_SECRET=substitua_por_um_segredo_forte
 JWT_EXPIRES_IN=1d
+UPLOAD_DIR=
 
-DB_HOST=host_do_mysql
+DB_HOST=localhost
 DB_PORT=3306
-DB_USER=usuario_do_mysql
-DB_PASSWORD=senha_do_mysql
+DB_USER=root
+DB_PASSWORD=sua_senha
 DB_NAME=tcc_agendamento
-```
+~~~
+
+Observações:
+
+- JWT_SECRET deve ser forte e exclusivo.
+- TZ deve permanecer como **America/Sao_Paulo** para que validações de dias e horários sejam consistentes.
+- TRUST_PROXY_HOPS deve ser **0** localmente e normalmente **1** no Railway.
+- CORS_ORIGIN aceita múltiplas origens separadas por vírgula.
+- Não use wildcard de CORS em produção.
+- UPLOAD_DIR é opcional localmente; sem ele, os arquivos ficam em **backend/uploads**.
+- Em produção, UPLOAD_DIR deve apontar para um volume persistente.
+- Nunca versione o arquivo .env.
 
 ### Frontend
 
-Configure no `frontend/.env` local ou nas variáveis da Vercel:
+Crie **frontend/.env** a partir de **frontend/.env.example**:
 
-```env
-VITE_API_URL=https://sua-api.railway.app
-```
+~~~env
+VITE_API_URL=http://localhost:3001
+~~~
 
-Não versionar `.env` com dados reais.
+Na Vercel, use a URL HTTPS pública do backend:
 
-## Como rodar localmente
+~~~env
+VITE_API_URL=https://sua-api.exemplo
+~~~
 
-### Backend
+Variáveis iniciadas por VITE_ ficam disponíveis no bundle público e não devem conter segredos.
 
-```bash
+## Banco de dados e migrations
+
+As duas migrations devem ser executadas nesta ordem:
+
+1. **backend/database/migrations/001_create_schema.sql**
+2. **backend/database/migrations/002_add_business_branding.sql**
+
+### Migration 001
+
+Cria o banco, charset, tabelas usuarios, negocios, servicos, profissionais e agendamentos, além de chaves estrangeiras, índices e constraints.
+
+### Migration 002
+
+Adiciona em negocios:
+
+- logo_url;
+- banner_url.
+
+A migration 002 deve ser executada com o schema correto já selecionado.
+
+### Execução no MySQL Workbench
+
+1. Abra a conexão MySQL.
+2. Execute 001_create_schema.sql.
+3. Confirme qual schema está configurado em DB_NAME.
+4. Selecione esse schema.
+5. Execute 002_add_business_branding.sql.
+6. Atualize a lista de tabelas.
+
+Verificação:
+
+~~~sql
+SHOW DATABASES;
+USE tcc_agendamento;
+SHOW TABLES;
+DESCRIBE negocios;
+~~~
+
+As colunas logo_url e banner_url devem aparecer em **DESCRIBE negocios**.
+
+No Railway, o schema gerenciado pode se chamar **railway**. Se a aba Data mostrar **You have no tables**, confira se o schema selecionado é o mesmo configurado em DB_NAME. Não execute a migration 002 em outro schema.
+
+## Uploads de logo e banner
+
+Rota privada:
+
+~~~txt
+PUT /api/negocio/:id/identidade-visual
+~~~
+
+O request usa multipart/form-data com os campos logo e banner.
+
+### Formatos aceitos
+
+- PNG.
+- JPG/JPEG.
+- WEBP.
+
+### Limites
+
+- Logo: até 5 MB.
+- Banner: até 10 MB.
+- No máximo uma logo e um banner por request.
+
+O backend verifica o tipo declarado, a assinatura binária, gera nomes aleatórios e não aceita SVG ou executáveis.
+
+### Persistência no Railway
+
+O armazenamento atual é local no backend. O sistema de arquivos comum do container pode ser perdido em reinicializações e novos deploys.
+
+Para produção:
+
+1. Crie um volume persistente no serviço do backend.
+2. Monte o volume em um caminho estável, por exemplo **/data/uploads**.
+3. Configure:
+
+~~~env
+UPLOAD_DIR=/data/uploads
+~~~
+
+4. Faça um upload de teste.
+5. Reinicie ou publique novamente o serviço.
+6. Confirme que a imagem continua disponível.
+
+Sem volume persistente, logo e banner podem desaparecer. Uma evolução futura possível é usar Cloudinary ou S3.
+
+## Como executar localmente
+
+### 1. Banco
+
+Execute as migrations 001 e 002.
+
+### 2. Backend
+
+Na raiz do projeto, configure .env. Depois:
+
+~~~bash
 cd backend
 npm install
 npm run dev
-```
+~~~
 
-Por padrão, a API local roda em:
+API local:
 
-```txt
+~~~txt
 http://localhost:3001
-```
+~~~
 
-### Frontend
+Testes básicos:
 
-```bash
+~~~txt
+GET http://localhost:3001/api/health
+GET http://localhost:3001/api/db-health
+~~~
+
+A rota db-health funciona somente em desenvolvimento. Em produção, retorna 404 sem testar publicamente o banco.
+
+### 3. Frontend
+
+~~~bash
 cd frontend
 npm install
 npm run dev
-```
+~~~
 
-Por padrão, o frontend local roda em:
+Frontend local:
 
-```txt
+~~~txt
 http://localhost:5173
-```
+~~~
 
-## Banco de dados
+Build de produção:
 
-O script SQL inicial deve ser executado uma vez para criar o banco e as tabelas.
+~~~bash
+npm run build
+~~~
 
-Script:
+## Instalação do PWA
 
-```txt
-backend/database/migrations/001_create_schema.sql
-```
+A instalação exige HTTPS em produção. Localhost também é aceito para desenvolvimento.
 
-No MySQL Workbench:
+### Android
 
-1. Abra uma conexão MySQL.
-2. Abra o script SQL.
-3. Execute o script completo.
-4. Atualize a lista de schemas.
-5. Confirme se as tabelas foram criadas no banco configurado em `DB_NAME`.
+1. Abra o Agendai no Chrome.
+2. Faça login para visualizar o botão **Instalar aplicativo**, quando disponível.
+3. Toque no botão ou abra o menu do Chrome.
+4. Selecione **Instalar app** ou **Adicionar à tela inicial**.
+5. Confirme.
 
-Comandos úteis:
+### iPhone e iPad
 
-```sql
-SHOW DATABASES;
-USE railway;
-SHOW TABLES;
-USE tcc_agendamento;
-SHOW TABLES;
-```
+O iOS não utiliza beforeinstallprompt.
 
-Observação para Railway: se a aba Data mostrar `You have no tables`, confira se o schema selecionado é o mesmo valor configurado em `DB_NAME`. Em alguns ambientes, o banco padrão pode ser `railway`; em outros, o projeto pode usar `tcc_agendamento`.
+1. Abra o Agendai no Safari.
+2. Toque em Compartilhar.
+3. Selecione **Adicionar à Tela de Início**.
+4. Confirme em **Adicionar**.
+
+### Desktop
+
+No Chrome ou Edge:
+
+1. Abra o Agendai.
+2. Use o ícone de instalação da barra de endereço, quando exibido.
+3. Como alternativa, abra o menu e selecione **Instalar Agendai**.
+4. Confirme.
 
 ## Rotas principais da API
 
 ### Públicas
 
-```txt
+~~~txt
 GET  /api/health
+
 POST /api/auth/cadastro
 POST /api/auth/login
 
@@ -187,24 +447,23 @@ GET  /api/publico/negocio/:slugOuId/servicos
 GET  /api/publico/negocio/:slugOuId/profissionais
 GET  /api/publico/negocio/:slugOuId/horarios-disponiveis
 POST /api/publico/negocio/:slugOuId/agendamentos
-```
-
-`/api/db-health` existe para verificação em desenvolvimento, mas não expõe teste do banco em produção.
+~~~
 
 ### Privadas
 
-As rotas privadas exigem:
+Exigem o header:
 
-```txt
+~~~txt
 Authorization: Bearer <token>
-```
+~~~
 
-```txt
+~~~txt
 GET /api/auth/me
 
 GET  /api/negocio
 POST /api/negocio
 PUT  /api/negocio/:id
+PUT  /api/negocio/:id/identidade-visual
 
 GET    /api/servicos
 POST   /api/servicos
@@ -223,96 +482,135 @@ GET    /api/agendamentos/hoje
 GET    /api/agendamentos/:id
 PUT    /api/agendamentos/:id/status
 DELETE /api/agendamentos/:id
-```
+~~~
 
 ## Segurança aplicada
 
-- Senhas armazenadas com bcrypt.
-- Autenticação com JWT.
-- `JWT_SECRET` configurado por variável de ambiente.
+- Senhas protegidas com bcrypt.
+- JWT configurado por variável de ambiente.
 - Rotas privadas protegidas por middleware.
-- Queries parametrizadas com `mysql2/promise`.
-- Isolamento por `usuario_id` e `negocio_id`.
-- Dados sensíveis, como `senha_hash`, não são retornados.
-- `.env` não deve ser versionado.
-- CORS configurado por domínio via `CORS_ORIGIN`.
-- Helmet e rate limit aplicados no backend.
-- Agendamentos validam serviço, profissional, data, horário e conflito.
-- Criação pública de agendamento usa transação.
+- Usuário autenticado consultado no banco.
+- Respostas públicas não incluem senha_hash.
+- Queries parametrizadas com mysql2/promise.
+- Isolamento por usuario_id e negocio_id.
+- Soft delete de serviços e profissionais.
+- Validação de IDs, e-mails, horários e payloads.
+- Transação na criação de agendamento.
+- Verificação de sobreposição de horários.
+- Helmet, limite de JSON, CORS e rate limit.
+- Limites e validação binária nos uploads.
+- .env, node_modules, dist e uploads locais ignorados pelo Git.
 
 ## Deploy
 
 ### Frontend na Vercel
 
-- Configurar `VITE_API_URL` com a URL pública do backend.
-- Rodar build com Vite.
-- O projeto possui configuração para SPA/rewrite quando necessário.
+- Diretório raiz: **frontend**.
+- Instalação: **npm install**.
+- Build: **npm run build**.
+- Saída: **dist**.
+- Variável: VITE_API_URL.
+- Rewrite SPA fornecido por **frontend/vercel.json**.
+
+Depois do deploy, valide diretamente uma rota interna, como /dashboard ou /agendar/:slugOuId.
 
 ### Backend na Railway
 
-- Configurar variáveis de ambiente do backend.
-- Definir `NODE_ENV=production`.
-- Configurar `CORS_ORIGIN` com a URL do frontend na Vercel.
-- Usar `PORT` fornecida pelo ambiente.
+- Diretório raiz: **backend**.
+- Instalação: **npm install**.
+- Inicialização: **npm start**.
+- NODE_ENV configurado como production.
+- TZ configurado como **America/Sao_Paulo**.
+- TRUST_PROXY_HOPS configurado conforme a cadeia de proxies do ambiente; no Railway, comece com **1** e valide o IP reconhecido pelo rate limit.
+- CORS_ORIGIN com o domínio da Vercel.
+- JWT_SECRET forte.
+- Credenciais MySQL.
+- Volume persistente e UPLOAD_DIR.
+
+Execute todas as migrations no banco correto antes de publicar o backend atualizado.
 
 ### MySQL na Railway
 
-- Criar o serviço MySQL.
-- Executar o script SQL uma vez.
-- Conferir se `DB_NAME` aponta para o schema correto.
-- Validar tabelas com `SHOW TABLES`.
+- Configure DB_HOST, DB_PORT, DB_USER, DB_PASSWORD e DB_NAME.
+- Execute migrations 001 e 002.
+- Confirme a tabela negocios e as colunas da identidade visual.
+- Não exponha credenciais em commits, prints ou documentação pública.
 
-## Testes manuais recomendados
+### Checklist pós-deploy
 
-1. Criar conta em `/cadastro`.
-2. Fazer login em `/login`.
-3. Validar acesso ao `/dashboard`.
-4. Cadastrar ou editar o negócio em `/negocio`.
-5. Criar um serviço em `/servicos`.
-6. Criar um profissional em `/profissionais`.
-7. Abrir o link público `/agendar/:slugOuId`.
-8. Escolher serviço, profissional, data e horário.
-9. Confirmar um agendamento.
-10. Tentar agendar o mesmo horário novamente e validar o bloqueio de conflito.
-11. Acessar `/agenda` e verificar o agendamento criado.
-12. Alterar status e cancelar agendamento.
+- GET /api/health responde.
+- Cadastro e login funcionam.
+- CORS aceita apenas os domínios configurados.
+- Dashboard carrega dados reais.
+- Link público abre sem login.
+- Horários respeitam o funcionamento.
+- Conflitos são bloqueados.
+- QR Code e WhatsApp usam a URL pública correta.
+- Logo e banner permanecem após redeploy.
+- PWA pode ser instalado.
+- Dark Mode permanece após recarregar.
 
-Também é recomendado testar:
+## Teste manual do fluxo completo
 
-- Token inválido.
-- Acesso privado sem login.
-- Serviço inativo no fluxo público.
-- Profissional inativo no fluxo público.
-- Data passada no agendamento público.
-- Comportamento responsivo no mobile.
+1. Criar conta em /cadastro.
+2. Fazer login.
+3. Cadastrar o negócio.
+4. Enviar logo e banner.
+5. Copiar o link e validar o QR Code.
+6. Compartilhar pelo WhatsApp.
+7. Criar serviços.
+8. Criar profissionais.
+9. Abrir /agendar/:slugOuId sem login.
+10. Confirmar a personalização pública.
+11. Escolher serviço, profissional, data e horário.
+12. Criar um agendamento.
+13. Repetir o horário e confirmar o bloqueio.
+14. Verificar o cliente em /clientes.
+15. Verificar o agendamento em /agenda.
+16. Alterar status e cancelar.
+17. Conferir métricas e gráfico.
+18. Gerar relatório PDF.
+19. Alternar tema claro e escuro.
+20. Testar a instalação PWA.
 
 ## Limitações atuais do MVP
 
-- Sem notificações por WhatsApp.
-- Sem envio de e-mail.
-- Sem integração com Google Calendar.
-- Sem pagamentos.
-- Sem testes automatizados completos.
-- Dashboard sem métricas reais.
-- Token armazenado em `localStorage`.
-- Sem reagendamento pelo cliente.
-- Sem bloqueio manual de horários.
-- Sem painel de clientes.
+- Não envia notificações automáticas por WhatsApp; existe apenas compartilhamento do link.
+- Não envia e-mails.
+- Não integra com Google Calendar.
+- Não possui pagamentos.
+- Não possui reagendamento ou cancelamento pelo cliente.
+- Não possui bloqueio manual de horários e folgas.
+- Não possui testes automatizados completos.
+- O JWT é armazenado em localStorage.
+- Uploads dependem de volume persistente no Railway.
+- O PWA não sincroniza dados offline.
+- O relatório PDF é gerado no frontend e resume períodos muito extensos.
+- O sistema considera um negócio por empreendedor.
 
 ## Próximas evoluções
 
-- Integração com WhatsApp API.
-- Confirmações por e-mail.
+- Notificações por WhatsApp API e e-mail.
 - Integração com Google Calendar.
-- Notificações automáticas.
-- Reagendamento e cancelamento pelo cliente.
-- Bloqueio de horários e folgas.
-- Painel de clientes.
-- Métricas reais no dashboard.
-- Pagamentos online.
-- Landing page pública do produto.
-- Testes automatizados de backend e frontend.
+- Reagendamento e cancelamento público.
+- Bloqueio de folgas e horários.
+- Pagamentos.
+- Métricas e filtros avançados.
+- Paginação para grandes volumes.
+- Armazenamento externo e otimização de imagens.
+- Testes automatizados.
+- Melhorias de segurança na persistência da sessão.
 
-## Status atual do projeto
+## Estado atual para o TCC
 
-O Agendai está em estado de MVP funcional, com frontend, backend e banco integrados. O sistema já cobre o fluxo principal do TCC: empreendedor configura seu negócio e cliente agenda online por link público com prevenção de conflito de horário.
+O MVP cobre o ciclo principal:
+
+1. O empreendedor cria uma conta.
+2. Configura o negócio e a identidade visual.
+3. Cadastra serviços e profissionais.
+4. Divulga link, QR Code ou WhatsApp.
+5. O cliente agenda sem criar conta.
+6. O sistema evita conflitos.
+7. O empreendedor acompanha agenda, clientes, indicadores e relatórios.
+
+O projeto permite demonstrar frontend, backend, banco relacional, autenticação, segurança básica, responsividade, PWA e aplicação prática para pequenos negócios.
