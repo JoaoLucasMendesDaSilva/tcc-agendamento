@@ -90,14 +90,7 @@ function filtrarAgendamentosPorPeriodo(agendamentos, inicio, fim) {
   });
 }
 
-function escaparCelulaCsv(valor) {
-  const texto = String(valor ?? '');
-  const textoSeguro = /^[=+\-@]/.test(texto.trimStart()) ? `'${texto}` : texto;
-
-  return `"${textoSeguro.replace(/"/g, '""')}"`;
-}
-
-function criarCsvAgendamentos(agendamentos) {
+function criarPlanilhaAgendamentos(agendamentos, xlsx) {
   const cabecalho = [
     'Data',
     'Horário',
@@ -118,18 +111,31 @@ function criarCsvAgendamentos(agendamentos) {
     .map((agendamento) => [
       agendamento.dataInicio ? formatarData(agendamento.dataInicio) : '',
       agendamento.dataInicio ? formatarHorario(agendamento.dataInicio) : '',
-      agendamento.cliente_nome,
-      agendamento.cliente_telefone,
-      agendamento.cliente_email,
-      agendamento.servico_nome,
-      agendamento.profissional_nome,
-      agendamento.status,
-      agendamento.observacoes,
+      String(agendamento.cliente_nome || ''),
+      String(agendamento.cliente_telefone || ''),
+      String(agendamento.cliente_email || ''),
+      String(agendamento.servico_nome || ''),
+      String(agendamento.profissional_nome || ''),
+      String(agendamento.status || ''),
+      String(agendamento.observacoes || ''),
     ]);
+  const dados = [cabecalho, ...linhas];
+  const planilha = xlsx.utils.aoa_to_sheet(dados);
 
-  return [cabecalho, ...linhas]
-    .map((linha) => linha.map(escaparCelulaCsv).join(';'))
-    .join('\r\n');
+  planilha['!cols'] = cabecalho.map((titulo, indice) => {
+    const maiorConteudo = dados.reduce(
+      (maior, linha) => Math.max(maior, String(linha[indice] || '').length),
+      titulo.length,
+    );
+
+    return { wch: Math.min(Math.max(maiorConteudo + 2, 12), 50) };
+  });
+
+  if (planilha['!ref']) {
+    planilha['!autofilter'] = { ref: planilha['!ref'] };
+  }
+
+  return planilha;
 }
 
 function encontrarMaisAgendado(agendamentos, campo) {
@@ -223,6 +229,7 @@ function Dashboard({ navigate }) {
   const [negocio, setNegocio] = useState(null);
   const [periodoRelatorio, setPeriodoRelatorio] = useState(obterPeriodoMesAtual);
   const [gerandoRelatorio, setGerandoRelatorio] = useState(false);
+  const [exportandoExcel, setExportandoExcel] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
 
@@ -527,7 +534,7 @@ function Dashboard({ navigate }) {
     }
   }
 
-  function exportarAgendamentosCsv() {
+  async function exportarAgendamentosXlsx() {
     setErro('');
 
     if (!periodoRelatorio.inicio || !periodoRelatorio.fim) {
@@ -540,27 +547,28 @@ function Dashboard({ navigate }) {
       return;
     }
 
+    setExportandoExcel(true);
+
     try {
+      const XLSX = await import('xlsx');
       const agendamentosPeriodo = filtrarAgendamentosPorPeriodo(
         agendamentos,
         periodoRelatorio.inicio,
         periodoRelatorio.fim,
       );
-      const csv = criarCsvAgendamentos(agendamentosPeriodo);
-      const arquivo = new Blob([`\uFEFF${csv}`], {
-        type: 'text/csv;charset=utf-8;',
-      });
-      const url = URL.createObjectURL(arquivo);
-      const link = document.createElement('a');
+      const planilha = criarPlanilhaAgendamentos(agendamentosPeriodo, XLSX);
+      const pastaTrabalho = XLSX.utils.book_new();
 
-      link.href = url;
-      link.download = `agendamentos-${periodoRelatorio.inicio}-${periodoRelatorio.fim}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
+      XLSX.utils.book_append_sheet(pastaTrabalho, planilha, 'Agendamentos');
+      XLSX.writeFile(
+        pastaTrabalho,
+        `agendamentos-${periodoRelatorio.inicio}-${periodoRelatorio.fim}.xlsx`,
+        { compression: true },
+      );
     } catch {
       setErro('Não foi possível exportar os agendamentos.');
+    } finally {
+      setExportandoExcel(false);
     }
   }
 
@@ -651,7 +659,7 @@ function Dashboard({ navigate }) {
           <div className="button-row">
             <button
               className="button button-primary"
-              disabled={carregando || gerandoRelatorio}
+              disabled={carregando || gerandoRelatorio || exportandoExcel}
               onClick={gerarRelatorioPdf}
               type="button"
             >
@@ -659,11 +667,11 @@ function Dashboard({ navigate }) {
             </button>
             <button
               className="button button-secondary"
-              disabled={carregando || gerandoRelatorio}
-              onClick={exportarAgendamentosCsv}
+              disabled={carregando || gerandoRelatorio || exportandoExcel}
+              onClick={exportarAgendamentosXlsx}
               type="button"
             >
-              Exportar Excel
+              {exportandoExcel ? 'Exportando...' : 'Exportar Excel'}
             </button>
           </div>
         </div>
