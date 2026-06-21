@@ -538,17 +538,12 @@ function AgendamentoPublico({ slugOuId }) {
               </dl>
 
               {resumoConfirmado.linkGerenciamento && (
-                <div className="public-link-box">
-                  <span className="public-link-text">
-                    {resumoConfirmado.linkGerenciamento}
-                  </span>
-                  <a
-                    className="button button-primary button-small"
-                    href={resumoConfirmado.linkGerenciamento}
-                  >
-                    Gerenciar agendamento
-                  </a>
-                </div>
+                <a
+                  className="button button-primary button-small"
+                  href={resumoConfirmado.linkGerenciamento}
+                >
+                  Gerenciar agendamento
+                </a>
               )}
             </section>
           )}
