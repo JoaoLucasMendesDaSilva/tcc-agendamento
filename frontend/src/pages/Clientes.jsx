@@ -3,6 +3,7 @@ import { CalendarDays, Search, UserCheck, Users } from 'lucide-react';
 import DashboardShell from '../components/DashboardShell';
 import { useAuth } from '../contexts/AuthContext';
 import { listarAgendamentos } from '../services/agendamentosService';
+import { listarServicos } from '../services/servicosService';
 
 const STATUS_LABELS = {
   pendente: 'Pendente',
@@ -32,6 +33,26 @@ function formatarData(valor) {
   }
 
   return data.toLocaleDateString('pt-BR');
+}
+
+function formatarHorario(valor) {
+  const data = valor instanceof Date ? valor : obterData(valor);
+
+  if (!data) {
+    return 'Horário não informado';
+  }
+
+  return data.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function formatarMoeda(valor) {
+  return Number(valor || 0).toLocaleString('pt-BR', {
+    currency: 'BRL',
+    style: 'currency',
+  });
 }
 
 function criarChaveCliente(agendamento) {
@@ -132,10 +153,58 @@ function calcularNovosClientes(clientes) {
   ).length;
 }
 
+function calcularPerfilCliente(cliente, servicos, precosDisponiveis) {
+  if (!cliente) {
+    return null;
+  }
+
+  const contagemServicos = new Map();
+  const precosPorServico = new Map(
+    servicos.map((servico) => [Number(servico.id), Number(servico.preco)]),
+  );
+  let cancelamentos = 0;
+  let valorEstimado = 0;
+  let agendamentosSemPreco = 0;
+
+  cliente.agendamentos.forEach((agendamento) => {
+    const nomeServico = agendamento.servico_nome || 'Serviço não informado';
+    contagemServicos.set(
+      nomeServico,
+      (contagemServicos.get(nomeServico) || 0) + 1,
+    );
+
+    if (agendamento.status === 'cancelado') {
+      cancelamentos += 1;
+      return;
+    }
+
+    const preco = precosPorServico.get(Number(agendamento.servico_id));
+
+    if (Number.isFinite(preco)) {
+      valorEstimado += preco;
+    } else {
+      agendamentosSemPreco += 1;
+    }
+  });
+
+  return {
+    cancelamentos,
+    servicosMaisUsados: Array.from(contagemServicos.entries())
+      .map(([nome, total]) => ({ nome, total }))
+      .sort((a, b) => b.total - a.total || a.nome.localeCompare(b.nome))
+      .slice(0, 3),
+    valorEstimado,
+    valorEstimadoDisponivel: precosDisponiveis,
+    valorEstimadoParcial: precosDisponiveis && agendamentosSemPreco > 0,
+  };
+}
+
 function Clientes({ navigate }) {
   const { logout, usuario } = useAuth();
   const montadoRef = useRef(false);
   const [agendamentos, setAgendamentos] = useState([]);
+  const [servicos, setServicos] = useState([]);
+  const [precosDisponiveis, setPrecosDisponiveis] = useState(false);
   const [clienteSelecionado, setClienteSelecionado] = useState(null);
   const [busca, setBusca] = useState('');
   const [carregando, setCarregando] = useState(true);
@@ -148,10 +217,23 @@ function Clientes({ navigate }) {
       setErro('');
 
       try {
-        const resposta = await listarAgendamentos();
+        const [resultadoAgendamentos, resultadoServicos] =
+          await Promise.allSettled([listarAgendamentos(), listarServicos()]);
 
         if (montadoRef.current) {
-          setAgendamentos(resposta.agendamentos || []);
+          if (resultadoAgendamentos.status === 'fulfilled') {
+            setAgendamentos(resultadoAgendamentos.value.agendamentos || []);
+          } else {
+            throw resultadoAgendamentos.reason;
+          }
+
+          if (resultadoServicos.status === 'fulfilled') {
+            setServicos(resultadoServicos.value.servicos || []);
+            setPrecosDisponiveis(true);
+          } else if (!silencioso) {
+            setServicos([]);
+            setPrecosDisponiveis(false);
+          }
         }
       } catch (err) {
         if (montadoRef.current) {
@@ -191,9 +273,11 @@ function Clientes({ navigate }) {
     [clientes, busca],
   );
   const clienteAtivo =
-    clientes.find((cliente) => cliente.chave === clienteSelecionado) ||
-    clientesFiltrados[0] ||
-    null;
+    clientes.find((cliente) => cliente.chave === clienteSelecionado) || null;
+  const perfilCliente = useMemo(
+    () => calcularPerfilCliente(clienteAtivo, servicos, precosDisponiveis),
+    [clienteAtivo, precosDisponiveis, servicos],
+  );
 
   function handleLogout() {
     logout();
@@ -345,9 +429,9 @@ function Clientes({ navigate }) {
         <aside className="dashboard-panel client-history-panel">
           <div className="panel-heading">
             <div>
-              <h2>Histórico resumido</h2>
+              <h2>Perfil do cliente</h2>
               <p className="panel-text">
-                Clique em um cliente para ver seus últimos agendamentos.
+                Clique em um cliente para consultar seus dados e histórico.
               </p>
             </div>
           </div>
@@ -379,14 +463,70 @@ function Clientes({ navigate }) {
                 </div>
               </div>
 
+              <dl className="details-list client-profile-contact">
+                <div>
+                  <dt>Telefone</dt>
+                  <dd>{clienteAtivo.telefone || 'Não informado'}</dd>
+                </div>
+                <div>
+                  <dt>E-mail</dt>
+                  <dd>{clienteAtivo.email || 'Não informado'}</dd>
+                </div>
+              </dl>
+
+              <div className="client-profile-metrics">
+                <div className="client-profile-metric">
+                  <span>Total de agendamentos</span>
+                  <strong>{clienteAtivo.totalAgendamentos}</strong>
+                </div>
+                <div className="client-profile-metric">
+                  <span>Último atendimento</span>
+                  <strong>{formatarData(clienteAtivo.ultimoAtendimento)}</strong>
+                </div>
+                <div className="client-profile-metric">
+                  <span>Cancelamentos</span>
+                  <strong>{perfilCliente.cancelamentos}</strong>
+                </div>
+                <div className="client-profile-metric">
+                  <span>Valor total estimado</span>
+                  <strong>
+                    {perfilCliente.valorEstimadoDisponivel
+                      ? formatarMoeda(perfilCliente.valorEstimado)
+                      : 'Indisponível'}
+                  </strong>
+                  {perfilCliente.valorEstimadoParcial && (
+                    <small>Estimativa parcial com preços atuais</small>
+                  )}
+                </div>
+              </div>
+
+              <section className="client-top-services" aria-labelledby="top-services-title">
+                <h3 id="top-services-title">Serviços mais usados</h3>
+                <div>
+                  {perfilCliente.servicosMaisUsados.map((servico) => (
+                    <span key={servico.nome}>
+                      {servico.nome} <strong>{servico.total}x</strong>
+                    </span>
+                  ))}
+                </div>
+              </section>
+
+              <div className="client-history-heading">
+                <h3>Histórico completo</h3>
+                <span>{clienteAtivo.totalAgendamentos} registro(s)</span>
+              </div>
+
               <div className="history-list">
                 {clienteAtivo.agendamentos.map((agendamento) => (
                   <article className="history-item" key={agendamento.id}>
-                    <div>
+                    <div className="history-item-date">
                       <strong>{formatarData(agendamento.data_hora_inicio)}</strong>
-                      <span>{agendamento.servico_nome || 'Serviço não informado'}</span>
+                      <span>{formatarHorario(agendamento.data_hora_inicio)}</span>
                     </div>
-                    <div>
+                    <div className="history-item-service">
+                      <strong>
+                        {agendamento.servico_nome || 'Serviço não informado'}
+                      </strong>
                       <span>
                         {agendamento.profissional_nome ||
                           'Profissional não informado'}
@@ -395,6 +535,11 @@ function Clientes({ navigate }) {
                         {STATUS_LABELS[agendamento.status] || agendamento.status}
                       </em>
                     </div>
+                    {agendamento.observacoes && (
+                      <p className="history-observations">
+                        <strong>Observações:</strong> {agendamento.observacoes}
+                      </p>
+                    )}
                   </article>
                 ))}
               </div>

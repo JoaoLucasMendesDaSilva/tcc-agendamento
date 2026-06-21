@@ -1997,6 +1997,81 @@ textarea:focus {
   margin-top: 20px;
 }
 
+.client-profile-contact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  border-top: 1px solid var(--gray-300);
+  border-bottom: 1px solid var(--gray-300);
+  padding: 14px 0;
+}
+
+.client-profile-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.client-profile-metric {
+  min-width: 0;
+  border-left: 3px solid var(--green-800);
+  padding-left: 10px;
+}
+
+.client-profile-metric span,
+.client-profile-metric small {
+  display: block;
+  color: var(--gray-500);
+  font-size: 0.78rem;
+}
+
+.client-profile-metric strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--gray-900);
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.client-top-services {
+  display: grid;
+  gap: 10px;
+}
+
+.client-top-services h3,
+.client-history-heading h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.client-top-services > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.client-top-services > div > span {
+  border-radius: 999px;
+  padding: 7px 10px;
+  color: var(--green-800);
+  background: var(--green-100);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.client-history-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--gray-300);
+  padding-top: 16px;
+}
+
+.client-history-heading span {
+  color: var(--gray-500);
+  font-size: 0.8rem;
+}
+
 .history-list {
   display: grid;
   gap: 12px;
@@ -2028,6 +2103,24 @@ textarea:focus {
 
 .history-item .status-badge {
   justify-self: start;
+}
+
+.history-item-service .status-badge {
+  margin-top: 4px;
+}
+
+.history-observations {
+  grid-column: 1 / -1;
+  margin: 0;
+  border-top: 1px solid var(--gray-300);
+  padding-top: 10px;
+  color: var(--gray-500);
+  font-size: 0.84rem;
+  overflow-wrap: anywhere;
+}
+
+.history-observations strong {
+  color: var(--gray-700);
 }
 
 .empty-icon {
