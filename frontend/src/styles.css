@@ -4418,6 +4418,12 @@ textarea:focus {
   font-weight: 500;
 }
 
+.landing-plan-price strong {
+  color: var(--gray-900);
+  font-size: clamp(1.85rem, 3vw, 2.2rem);
+  line-height: 1.05;
+}
+
 .landing-plan-annual {
   color: var(--green-800);
   font-size: 0.8rem;
@@ -4425,8 +4431,14 @@ textarea:focus {
 }
 
 .landing-plan-stage {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 5px 9px;
   color: var(--green-800);
-  font-size: 1rem;
+  background: var(--green-50);
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .landing-plans-section .landing-plan-card > p {

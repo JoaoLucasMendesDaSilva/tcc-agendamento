@@ -109,29 +109,37 @@ const passos = [
 
 const planos = [
   {
-    nome: 'MVP do TCC',
-    etapa: 'Disponível na apresentação',
-    descricao: 'Versão focada no essencial para pequenos negócios organizarem serviços, profissionais e agendamentos.',
-    itens: ['Cadastro e login', 'Negócio, serviços e profissionais', 'Agendamento público', 'Validação de horários', 'Painel do empreendedor'],
+    nome: 'Gratuito',
+    precoMensal: 'R$ 0,00',
+    precoAnual: 'R$ 0,00/ano',
+    etapa: 'MVP demonstrável',
+    descricao: 'Ideal para pequenos negócios que estão começando e querem organizar os primeiros agendamentos sem custo.',
+    itens: ['Até 50 agendamentos por mês', '1 profissional', 'Lembretes por e-mail', 'Link público', 'QR Code', 'Agenda simples'],
+  },
+  {
+    nome: 'Básico',
+    precoMensal: 'R$ 19,90',
+    precoAnual: 'R$ 179,00/ano',
+    etapa: 'Cenário de evolução',
+    descricao: 'Para negócios que já possuem uma rotina de atendimentos e precisam de mais capacidade de agendamento.',
+    itens: ['Até 200 agendamentos por mês', '1 profissional', 'Lembretes por e-mail', 'Gestão de serviços', 'Gestão de clientes', 'Relatórios simples'],
+  },
+  {
+    nome: 'Profissional',
+    precoMensal: 'R$ 39,90',
+    precoAnual: 'R$ 359,00/ano',
+    etapa: 'Exemplo principal',
+    descricao: 'Para negócios que querem automatizar a comunicação, acompanhar resultados e crescer com mais controle.',
+    itens: ['Agendamentos ilimitados', 'Até 5 profissionais', 'Lembretes por WhatsApp e e-mail', 'Relatórios', 'Personalização visual', 'Gestão de clientes recorrentes'],
     destaque: true,
   },
   {
-    nome: 'Melhorias próximas',
-    etapa: 'Roadmap curto',
-    descricao: 'Recursos que ampliam a rotina sem mudar a proposta simples do sistema.',
-    itens: ['Lembretes simulados', 'Exportação Excel', 'Relatório PDF', 'PWA instalável', 'Histórico de clientes'],
-  },
-  {
-    nome: 'Evolução futura',
-    etapa: 'Fora do MVP inicial',
-    descricao: 'Ideias para uma versão comercial futura, dependentes de novas validações e integrações.',
-    itens: ['WhatsApp real', 'E-mail transacional', 'Personalização avançada', 'Indicadores mais completos', 'Integrações externas'],
-  },
-  {
-    nome: 'Não incluído agora',
-    etapa: 'Escopo protegido',
-    descricao: 'Funcionalidades maiores ficam fora desta entrega para manter o projeto simples e explicável no TCC.',
-    itens: ['Pagamentos', 'Assinaturas', 'Marketplace', 'Múltiplas unidades', 'Aplicativo mobile nativo'],
+    nome: 'Rede',
+    precoMensal: 'R$ 99,90',
+    precoAnual: 'R$ 899,00/ano',
+    etapa: 'Futuro fora do MVP',
+    descricao: 'Para equipes, redes e negócios com mais de uma unidade que precisariam de controle centralizado.',
+    itens: ['Tudo do Plano Profissional', 'Múltiplas unidades', 'Painel centralizado', 'Suporte prioritário', 'Relatórios gerenciais'],
   },
 ];
 
@@ -369,15 +377,15 @@ function LandingPage({ navigate }) {
 
       <section className="landing-section landing-plans-section" id="planos">
         <div className="landing-section-heading landing-heading-centered">
-          <p className="landing-kicker">Escopo e roadmap</p>
-          <h2>O que entra no MVP e o que fica para evolução futura.</h2>
-          <p>Esta seção é demonstrativa para o TCC: ajuda a separar a entrega atual das possibilidades de crescimento.</p>
+          <p className="landing-kicker">Planos demonstrativos</p>
+          <h2>Um plano para cada fase do seu negócio.</h2>
+          <p>Valores mensais e anuais apresentados como estudo de viabilidade para uma evolução comercial futura.</p>
         </div>
         <div className="landing-plan-notice">
           <CalendarCheck2 aria-hidden="true" size={22} strokeWidth={2} />
           <div>
-            <strong>Sem cobrança real nesta versão</strong>
-            <span>O projeto não implementa pagamento, assinatura ou marketplace no MVP apresentado.</span>
+            <strong>Sem cobrança real no MVP</strong>
+            <span>Pagamento, assinatura e checkout não são implementados nesta versão do TCC; os valores abaixo são demonstrativos.</span>
           </div>
         </div>
         <div className="landing-plan-grid">
@@ -389,9 +397,14 @@ function LandingPage({ navigate }) {
               <div className="landing-plan-heading">
                 <div>
                   <h3>{plano.nome}</h3>
-                  <strong className="landing-plan-stage">{plano.etapa}</strong>
+                  <p className="landing-plan-price">
+                    <strong>{plano.precoMensal}</strong>
+                    <span>/mês</span>
+                  </p>
+                  <span className="landing-plan-annual">{plano.precoAnual}</span>
+                  <span className="landing-plan-stage">{plano.etapa}</span>
                 </div>
-                {plano.destaque && <span className="plan-label">Foco atual</span>}
+                {plano.destaque && <span className="plan-label">Destaque</span>}
               </div>
               <p>{plano.descricao}</p>
               <ul>
