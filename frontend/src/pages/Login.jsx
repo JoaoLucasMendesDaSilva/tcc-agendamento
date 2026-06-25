@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { CalendarCheck2, LockKeyhole, Mail, ShieldCheck } from 'lucide-react';
 import AuthLayout from '../components/AuthLayout';
 import BrandLogo from '../components/BrandLogo';
 import { useAuth } from '../contexts/AuthContext';
@@ -28,41 +29,66 @@ function Login({ navigate }) {
   return (
     <AuthLayout>
       <section className="auth-panel" aria-labelledby="login-title">
-        <BrandLogo />
-        <p className="eyebrow">Bem-vindo de volta!</p>
-        <h1 id="login-title">Entrar</h1>
-        <p className="panel-text">
-          Faça login para acessar sua conta.
+        <div className="auth-panel-header">
+          <BrandLogo />
+          <span className="auth-secure-chip">
+            <ShieldCheck aria-hidden="true" size={16} strokeWidth={2} />
+            Acesso seguro
+          </span>
+        </div>
+        <p className="eyebrow">Bem-vindo de volta</p>
+        <h1 id="login-title">Entre no seu painel</h1>
+        <p className="panel-text auth-intro-text">
+          Acesse sua agenda para acompanhar atendimentos, clientes e horários do negócio.
         </p>
+
+        <div className="auth-login-summary" aria-label="O que você acessa ao entrar">
+          <span>
+            <CalendarCheck2 aria-hidden="true" size={18} strokeWidth={2} />
+            Agenda organizada
+          </span>
+          <span>
+            <LockKeyhole aria-hidden="true" size={18} strokeWidth={2} />
+            Dados do negócio protegidos
+          </span>
+        </div>
 
         <form className="form" onSubmit={handleSubmit}>
           <label>
             E-mail
-            <input
-              autoComplete="email"
-              inputMode="email"
-              onChange={(event) => setEmail(event.target.value)}
-              required
-              type="email"
-              value={email}
-            />
+            <span className="auth-input-shell">
+              <Mail aria-hidden="true" size={18} strokeWidth={2} />
+              <input
+                autoComplete="email"
+                inputMode="email"
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="seuemail@exemplo.com"
+                required
+                type="email"
+                value={email}
+              />
+            </span>
           </label>
 
           <label>
             Senha
-            <input
-              autoComplete="current-password"
-              minLength={8}
-              onChange={(event) => setSenha(event.target.value)}
-              required
-              type="password"
-              value={senha}
-            />
+            <span className="auth-input-shell">
+              <LockKeyhole aria-hidden="true" size={18} strokeWidth={2} />
+              <input
+                autoComplete="current-password"
+                minLength={8}
+                onChange={(event) => setSenha(event.target.value)}
+                placeholder="Digite sua senha"
+                required
+                type="password"
+                value={senha}
+              />
+            </span>
           </label>
 
           {erro && <p className="message message-error">{erro}</p>}
 
-          <button className="button button-primary" disabled={carregando} type="submit">
+          <button className="button button-primary auth-submit-button" disabled={carregando} type="submit">
             {carregando ? 'Entrando...' : 'Entrar'}
           </button>
         </form>

@@ -2,13 +2,20 @@ import authIllustration from '../assets/auth-illustration.png';
 import BrandLogo from './BrandLogo';
 
 function AuthLayout({ children, mode = 'login' }) {
+  const isCadastro = mode === 'cadastro';
+
   return (
-    <main className="auth-page">
+    <main className={`auth-page auth-page-${mode}`}>
       <section className="auth-card" aria-label="Acesso do empreendedor">
         <div className="auth-form-panel">{children}</div>
 
         <aside className="auth-visual-panel">
           <BrandLogo />
+          <div className="auth-visual-proof" aria-label="Resumo do Agendai">
+            <span>Agenda online</span>
+            <span>Sem conflito</span>
+            <span>Painel simples</span>
+          </div>
           <div className="auth-illustration-wrap">
             <img
               alt="Ilustração de calendário com planta e relógio"
@@ -18,11 +25,15 @@ function AuthLayout({ children, mode = 'login' }) {
           </div>
           <div className="auth-visual-copy">
             <h2>
-              {mode === 'cadastro'
+              {isCadastro
                 ? 'Comece a organizar seus horários'
-                : 'Organize seu tempo, encante seus clientes'}
+                : 'Seu painel de atendimento começa aqui'}
             </h2>
-            <p>Agendamentos simples e eficientes para o seu negócio crescer.</p>
+            <p>
+              {isCadastro
+                ? 'Crie sua conta e prepare o Agendai para receber seus primeiros agendamentos.'
+                : 'Entre para acompanhar agenda, clientes e horários com clareza.'}
+            </p>
           </div>
         </aside>
       </section>
