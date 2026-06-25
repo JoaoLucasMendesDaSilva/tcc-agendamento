@@ -10,7 +10,13 @@ import {
   Users,
 } from 'lucide-react';
 import DashboardShell from '../components/DashboardShell';
+import EmptyState from '../components/ui/EmptyState';
+import MetricCard from '../components/ui/MetricCard';
+import PageHeader from '../components/ui/PageHeader';
+import Panel from '../components/ui/Panel';
+import PanelSkeleton from '../components/ui/PanelSkeleton';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { listarAgendamentos } from '../services/agendamentosService';
 import { buscarNegocio } from '../services/negocioService';
 import { listarProfissionais } from '../services/profissionaisService';
@@ -203,23 +209,9 @@ function montarDadosSemana(agendamentos) {
   return valores;
 }
 
-function MetricCard({ Icone, classeIcone = '', titulo, valor, detalhe }) {
-  return (
-    <article className="metric-card">
-      <span className={`metric-icon ${classeIcone}`} aria-hidden="true">
-        <Icone size={22} strokeWidth={2} />
-      </span>
-      <div>
-        <p>{titulo}</p>
-        <strong>{valor}</strong>
-        <small>{detalhe}</small>
-      </div>
-    </article>
-  );
-}
-
 function Dashboard({ navigate }) {
   const { logout, usuario } = useAuth();
+  const { isDark } = useTheme();
   const montadoRef = useRef(false);
   const chartRef = useRef(null);
   const chartInstanceRef = useRef(null);
@@ -330,6 +322,15 @@ function Dashboard({ navigate }) {
       return undefined;
     }
 
+    const rootStyles = getComputedStyle(document.documentElement);
+    const verdeBarra = rootStyles.getPropertyValue('--green-700').trim() || '#00816f';
+    const verdeBorda = rootStyles.getPropertyValue('--green-800').trim() || '#006b5a';
+    const textoSuave = rootStyles.getPropertyValue('--gray-500').trim() || '#667085';
+    const linhaGrade = isDark
+      ? 'rgba(45, 58, 71, 0.9)'
+      : 'rgba(223, 229, 236, 0.9)';
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     if (chartInstanceRef.current) {
       chartInstanceRef.current.destroy();
     }
@@ -342,8 +343,8 @@ function Dashboard({ navigate }) {
           {
             label: 'Agendamentos',
             data: dadosSemana.map((dia) => dia.total),
-            backgroundColor: 'rgba(0, 127, 111, 0.78)',
-            borderColor: '#006b5a',
+            backgroundColor: verdeBarra,
+            borderColor: verdeBorda,
             borderRadius: 10,
             borderSkipped: false,
             maxBarThickness: 42,
@@ -351,6 +352,12 @@ function Dashboard({ navigate }) {
         ],
       },
       options: {
+        animation: reducedMotion
+          ? false
+          : {
+              duration: 520,
+              easing: 'easeOutQuart',
+            },
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
@@ -358,6 +365,18 @@ function Dashboard({ navigate }) {
             display: false,
           },
           tooltip: {
+            backgroundColor: isDark ? '#101c1b' : '#101727',
+            borderColor: isDark ? '#2d3a47' : '#dfe5ec',
+            borderWidth: 1,
+            displayColors: false,
+            padding: 10,
+            titleFont: {
+              family: 'Poppins',
+              weight: 700,
+            },
+            bodyFont: {
+              family: 'Poppins',
+            },
             callbacks: {
               label(context) {
                 const total = context.parsed.y;
@@ -372,7 +391,7 @@ function Dashboard({ navigate }) {
               display: false,
             },
             ticks: {
-              color: '#667085',
+              color: textoSuave,
               font: {
                 family: 'Poppins',
                 weight: 600,
@@ -383,13 +402,13 @@ function Dashboard({ navigate }) {
             beginAtZero: true,
             ticks: {
               precision: 0,
-              color: '#667085',
+              color: textoSuave,
               font: {
                 family: 'Poppins',
               },
             },
             grid: {
-              color: 'rgba(223, 229, 236, 0.9)',
+              color: linhaGrade,
             },
           },
         },
@@ -400,7 +419,7 @@ function Dashboard({ navigate }) {
       chartInstanceRef.current?.destroy();
       chartInstanceRef.current = null;
     };
-  }, [dadosSemana]);
+  }, [dadosSemana, isDark]);
 
   function handleLogout() {
     logout();
@@ -575,27 +594,27 @@ function Dashboard({ navigate }) {
   const metricas = [
     {
       titulo: 'Total de agendamentos',
-      valor: carregando ? '...' : agendamentos.length,
+      valor: agendamentos.length,
       detalhe: 'Histórico do negócio',
       Icone: CalendarCheck,
     },
     {
       titulo: 'Clientes únicos',
-      valor: carregando ? '...' : contarClientesUnicos(agendamentos),
+      valor: contarClientesUnicos(agendamentos),
       detalhe: 'Por telefone, e-mail ou nome',
       Icone: Users,
       classeIcone: 'metric-blue',
     },
     {
       titulo: 'Serviços ativos',
-      valor: carregando ? '...' : servicos.length,
+      valor: servicos.length,
       detalhe: 'Disponíveis para agendar',
       Icone: Scissors,
       classeIcone: 'metric-yellow',
     },
     {
       titulo: 'Profissionais ativos',
-      valor: carregando ? '...' : profissionais.length,
+      valor: profissionais.length,
       detalhe: 'Equipe de atendimento',
       Icone: Store,
     },
@@ -608,37 +627,36 @@ function Dashboard({ navigate }) {
       onLogout={handleLogout}
       usuario={usuario}
     >
-      <header className="page-title">
-        <div>
-          <p className="eyebrow">Visão geral do seu negócio</p>
-          <h1>Dashboard</h1>
-          <p className="panel-text">
-            Acompanhe indicadores reais do atendimento em um painel simples.
-          </p>
-        </div>
-      </header>
+      <PageHeader
+        eyebrow="Visão geral do seu negócio"
+        title="Dashboard"
+        description="Acompanhe indicadores reais do atendimento em um painel simples."
+        meta={
+          <span className="status-badge dashboard-freshness" aria-live="polite">
+            {carregando ? 'Atualizando' : 'Painel atualizado'}
+          </span>
+        }
+      />
 
       {erro && <p className="message message-error">{erro}</p>}
 
       <section className="metrics-grid" aria-label="Indicadores do negócio">
         {metricas.map((metrica) => (
-          <MetricCard key={metrica.titulo} {...metrica} />
+          <MetricCard key={metrica.titulo} loading={carregando} {...metrica} />
         ))}
       </section>
 
-      <section className="dashboard-panel report-panel" aria-labelledby="report-title">
-        <div className="panel-heading">
-          <div>
-            <h2 id="report-title">Relatório PDF</h2>
-            <p className="panel-text">
-              Gere um resumo do negócio usando os dados reais do período.
-            </p>
-          </div>
+      <Panel
+        className="report-panel"
+        title="Relatório PDF"
+        titleId="report-title"
+        description="Gere um resumo do negócio usando os dados reais do período."
+        icon={
           <span className="summary-icon" aria-hidden="true">
             <FileText size={24} strokeWidth={2} />
           </span>
-        </div>
-
+        }
+      >
         <div className="report-controls">
           <label>
             Início
@@ -675,17 +693,14 @@ function Dashboard({ navigate }) {
             </button>
           </div>
         </div>
-      </section>
+      </Panel>
 
       <section className="dashboard-grid">
-        <article className="dashboard-panel" aria-labelledby="next-title">
-          <div className="panel-heading">
-            <div>
-              <h2 id="next-title">Próximo agendamento</h2>
-              <p className="panel-text">
-                Próximo horário pendente ou confirmado na agenda.
-              </p>
-            </div>
+        <Panel
+          title="Próximo agendamento"
+          titleId="next-title"
+          description="Próximo horário pendente ou confirmado na agenda."
+          actions={
             <button
               className="button button-secondary button-small"
               onClick={() => navigate('/agenda')}
@@ -693,13 +708,10 @@ function Dashboard({ navigate }) {
             >
               Ver agenda
             </button>
-          </div>
+          }
+        >
 
-          {carregando && (
-            <p className="message message-info" aria-live="polite">
-              Carregando indicadores...
-            </p>
-          )}
+          {carregando && <PanelSkeleton lines={3} />}
 
           {!carregando && proximoAgendamento && (
             <div className="next-appointment-card">
@@ -723,34 +735,31 @@ function Dashboard({ navigate }) {
           )}
 
           {!carregando && !proximoAgendamento && (
-            <div className="dashboard-empty">
-              <span className="empty-icon" aria-hidden="true">
-                <CalendarDays size={24} strokeWidth={2} />
-              </span>
-              <div>
-                <strong>Nenhum próximo agendamento</strong>
-                <p>
-                  Quando houver horários pendentes ou confirmados, o próximo
-                  atendimento aparecerá aqui.
-                </p>
-              </div>
-            </div>
+            <EmptyState Icone={CalendarDays} title="Nenhum próximo agendamento">
+              Quando houver horários pendentes ou confirmados, o próximo
+              atendimento aparecerá aqui.
+            </EmptyState>
           )}
-        </article>
+        </Panel>
 
-        <article className="dashboard-panel" aria-labelledby="week-title">
-          <div className="panel-heading">
-            <div>
-              <h2 id="week-title">Agendamentos da semana</h2>
-              <p className="panel-text">
-                Quantidade de agendamentos por dia na semana atual.
-              </p>
-            </div>
-          </div>
+        <Panel
+          title="Agendamentos da semana"
+          titleId="week-title"
+          description="Quantidade de agendamentos por dia na semana atual."
+        >
           <div className="dashboard-chart">
+            {carregando && (
+              <div className="chart-loading" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+              </div>
+            )}
             <canvas ref={chartRef} aria-label="Gráfico de agendamentos da semana" />
           </div>
-        </article>
+        </Panel>
       </section>
 
       <section className="shortcut-strip" aria-label="Atalhos do sistema">
