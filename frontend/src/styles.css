@@ -3610,6 +3610,11 @@ textarea:focus {
   background: var(--panel-bg-soft);
 }
 
+[data-theme="dark"] .booking-intro-card small {
+  color: var(--green-800);
+  background: rgba(49, 185, 159, 0.14);
+}
+
 @media (min-width: 720px) {
   .landing-page {
     padding: 24px;
