@@ -1637,7 +1637,7 @@ textarea:focus {
 }
 
 .public-booking-card {
-  width: min(100%, 920px);
+  width: min(100%, 1060px);
   overflow: hidden;
   border: 1px solid rgba(223, 229, 236, 0.8);
   border-radius: 20px;
@@ -1761,6 +1761,20 @@ textarea:focus {
   background: #fbfcfd;
 }
 
+.booking-progress {
+  height: 5px;
+  overflow: hidden;
+  background: var(--gray-100);
+}
+
+.booking-progress span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--green-700), var(--green-800));
+  transition: width 220ms ease;
+}
+
 .booking-step {
   display: grid;
   gap: 7px;
@@ -1821,6 +1835,17 @@ textarea:focus {
   padding: 18px;
 }
 
+.booking-workspace {
+  display: grid;
+  gap: 18px;
+}
+
+.booking-flow {
+  display: grid;
+  min-width: 0;
+  gap: 18px;
+}
+
 @media (max-width: 420px) {
   .booking-steps {
     gap: 4px;
@@ -1865,6 +1890,17 @@ textarea:focus {
 .booking-intro-card p {
   margin-top: 4px;
   color: var(--gray-500);
+}
+
+.booking-intro-card small {
+  display: inline-block;
+  margin-top: 10px;
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: var(--green-800);
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
 .booking-section {
@@ -1981,6 +2017,31 @@ textarea:focus {
 .booking-summary div {
   border-top: 1px solid rgba(0, 127, 111, 0.15);
   padding-top: 10px;
+}
+
+.booking-selection-summary {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  border: 1px solid rgba(0, 127, 111, 0.14);
+  border-radius: var(--radius);
+  padding: 18px;
+  background:
+    linear-gradient(180deg, var(--green-50), var(--white));
+  box-shadow: var(--shadow-card);
+}
+
+.booking-selection-summary h2 {
+  font-size: 1.08rem;
+}
+
+.booking-summary-note {
+  border-radius: 12px;
+  padding: 12px;
+  color: var(--green-900);
+  background: rgba(229, 245, 239, 0.76);
+  font-size: 0.86rem;
+  font-weight: 600;
 }
 
 .auth-panel,
@@ -3042,6 +3103,13 @@ textarea:focus {
   transform: translateY(-2px);
 }
 
+.choice-card:focus-visible,
+.time-button:focus-visible {
+  outline: none;
+  border-color: var(--green-700);
+  box-shadow: 0 0 0 4px rgba(0, 127, 111, 0.16);
+}
+
 .choice-card:active {
   transform: scale(0.98);
 }
@@ -3049,6 +3117,8 @@ textarea:focus {
 .choice-card.is-selected,
 .time-button.is-selected {
   border-color: var(--green-700);
+  color: var(--green-900);
+  background: var(--green-50);
   box-shadow: 0 0 0 4px rgba(0, 127, 111, 0.12);
   transform: translateY(-1px);
 }
@@ -3524,6 +3594,22 @@ textarea:focus {
     linear-gradient(180deg, var(--panel-bg), var(--panel-bg-soft));
 }
 
+[data-theme="dark"] .booking-progress {
+  background: var(--gray-300);
+}
+
+[data-theme="dark"] .choice-card.is-selected,
+[data-theme="dark"] .time-button.is-selected,
+[data-theme="dark"] .booking-selection-summary {
+  color: var(--green-800);
+  background: var(--green-50);
+}
+
+[data-theme="dark"] .booking-summary-note {
+  color: var(--gray-900);
+  background: var(--panel-bg-soft);
+}
+
 @media (min-width: 720px) {
   .landing-page {
     padding: 24px;
@@ -3632,6 +3718,16 @@ textarea:focus {
 
   .time-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .booking-workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 0.42fr);
+    align-items: start;
+  }
+
+  .booking-selection-summary {
+    position: sticky;
+    top: 22px;
   }
 
   .report-controls {

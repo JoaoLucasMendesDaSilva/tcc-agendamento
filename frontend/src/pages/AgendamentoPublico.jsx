@@ -37,6 +37,14 @@ const DIAS_SEMANA = [
 
 const ETAPAS = ['Serviço', 'Profissional', 'Data e hora', 'Dados', 'Confirmação'];
 
+const ETAPA_DESCRICOES = {
+  1: 'Comece escolhendo o atendimento desejado.',
+  2: 'Agora escolha quem vai realizar o atendimento.',
+  3: 'Consulte os horários livres para a data escolhida.',
+  4: 'Preencha seus dados para finalizar.',
+  5: 'Seu agendamento foi registrado com sucesso.',
+};
+
 function hojeIso() {
   const hoje = new Date();
   const ano = hoje.getFullYear();
@@ -166,6 +174,10 @@ function AgendamentoPublico({ slugOuId }) {
         : servicoId
           ? 2
           : 1;
+  const progressoEtapa = Math.max(
+    0,
+    ((etapaAtual - 1) / (ETAPAS.length - 1)) * 100
+  );
   const statusAberto = negocioEstaAberto(negocio);
   const logoUrl = resolverAssetUrl(negocio?.logo_url);
   const bannerUrl = resolverAssetUrl(negocio?.banner_url);
@@ -495,6 +507,16 @@ function AgendamentoPublico({ slugOuId }) {
             );
           })}
         </div>
+        <div
+          aria-label={`Progresso do agendamento: etapa ${etapaAtual} de ${ETAPAS.length}`}
+          aria-valuemax={ETAPAS.length}
+          aria-valuemin="1"
+          aria-valuenow={etapaAtual}
+          className="booking-progress"
+          role="progressbar"
+        >
+          <span style={{ width: `${progressoEtapa}%` }} />
+        </div>
 
         <div className="public-booking-content">
           {erro && <p className="message message-error">{erro}</p>}
@@ -512,9 +534,12 @@ function AgendamentoPublico({ slugOuId }) {
                 Selecione as opções disponíveis, preencha seus dados e confirme
                 o horário.
               </p>
+              <small>{ETAPA_DESCRICOES[etapaAtual]}</small>
             </div>
           </section>
 
+          <div className="booking-workspace">
+            <div className="booking-flow">
           {resumoConfirmado && (
             <section
               className="booking-section confirmation-card"
@@ -811,6 +836,38 @@ function AgendamentoPublico({ slugOuId }) {
               </form>
             </section>
           )}
+            </div>
+
+            <aside className="booking-selection-summary" aria-label="Resumo do agendamento">
+              <p className="step-label">Resumo</p>
+              <h2>Sua escolha</h2>
+              <dl className="details-list booking-summary">
+                <div>
+                  <dt>Serviço</dt>
+                  <dd>{servicoSelecionado?.nome || 'Ainda não escolhido'}</dd>
+                </div>
+                <div>
+                  <dt>Profissional</dt>
+                  <dd>{profissionalSelecionado?.nome || 'Ainda não escolhido'}</dd>
+                </div>
+                <div>
+                  <dt>Data</dt>
+                  <dd>{data ? formatarData(data) : 'Ainda não escolhida'}</dd>
+                </div>
+                <div>
+                  <dt>Horário</dt>
+                  <dd>
+                    {horarioSelecionado
+                      ? formatarHorario(horarioSelecionado.data_hora_inicio)
+                      : 'Ainda não escolhido'}
+                  </dd>
+                </div>
+              </dl>
+              <p className="booking-summary-note">
+                Os horários aparecem conforme a agenda livre do profissional.
+              </p>
+            </aside>
+          </div>
         </div>
       </section>
     </main>
