@@ -2894,6 +2894,7 @@ textarea:focus {
 .public-link-box {
   display: grid;
   gap: 10px;
+  min-width: 0;
   margin-top: 8px;
   border: 1px solid rgba(0, 127, 111, 0.16);
   border-radius: 14px;
@@ -2907,17 +2908,24 @@ textarea:focus {
   font-size: 0.88rem;
   font-weight: 600;
   line-height: 1.45;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overflow-wrap: normal;
+  scrollbar-width: thin;
+  white-space: nowrap;
+  word-break: normal;
 }
 
 .public-link-actions {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+  min-width: 0;
 }
 
 .public-link-actions .button {
-  width: 100%;
+  flex: 1 1 150px;
+  min-width: 0;
 }
 
 .whatsapp-share-button {
@@ -2970,17 +2978,8 @@ textarea:focus {
 }
 
 @media (min-width: 720px) {
-  .public-link-box {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-  }
-
-  .public-link-actions {
-    grid-template-columns: repeat(2, max-content);
-  }
-
   .public-link-actions .button {
-    width: auto;
+    flex: 0 1 auto;
   }
 }
 
@@ -3751,6 +3750,12 @@ textarea:focus {
 
   .management-grid {
     grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+  }
+}
+
+@media (min-width: 1040px) and (max-width: 1180px) {
+  .management-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
